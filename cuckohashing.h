@@ -13,10 +13,10 @@ class CuckoHashing : IFileUtils {
         int32_t m_secondHash(uint32_t dni);
         void m_rehash(uint32_t dni, uint32_t pos);
         void m_rehashAll(uint32_t dni);
+        bool writeFile() override;
+        bool readFile() override;
     public:
         CuckoHashing(uint32_t sizeTabla);
         bool insertDni(uint32_t dni);
         uint32_t searchDNI(uint32_t dni);
-        bool writeFile() override;
-        bool readFile() override;
 };

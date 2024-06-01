@@ -3,11 +3,13 @@
 // capacidades son placeholders
 typedef struct{
     uint32_t dni;
-    char nombres[50];
-    char apellidos[50];
-    char nacionalidad[50];
-    char direccion[50];
-    char telefono[50];
-    char correo[50];
+    char nombres[40];
+    char apellidos[40];
+    char direccion[30];
+    char nacimiento[8];
+    char nacionalidad[3];
+    char lugarnacimiento[20];
+    uint32_t telefono;
+    char correo[40];
     char estadoCivil;   
 } DatosPersona;
