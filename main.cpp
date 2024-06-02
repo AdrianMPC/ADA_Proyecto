@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstring>
 #include "btree.h"
+#include "src/firstload.cpp"
 
 // AQUI ESA LA IMPLEMENTACION DEL BTREE TEMPORAL
 
@@ -129,7 +130,3 @@ int main() {
     return 0;
 }
 */
-
-int main(){
-    return 0;
-}

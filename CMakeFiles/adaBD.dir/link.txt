@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/adaBD.dir/src/btree.o CMakeFiles/adaBD.dir/src/firstload.o CMakeFiles/adaBD.dir/main.o -o adaBD 

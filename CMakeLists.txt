@@ -1,36 +1,33 @@
-cmake_minimum_required(VERSION 3.10)
-
-# Nombre del proyecto
+# Specify the project name
 project(ADA_proyecto)
 
-# Especificar el estándar de C++
+# Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Incluir directorios con archivos de cabecera
+# Include directories with header files
 include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/models)
 
-# Especificar los archivos fuente
+# Specify the source files
 set(SOURCES
-    btree.cpp
-    cuckohashing.cpp
-    firstload.cpp
+    src/btree.cpp
+    src/firstload.cpp
     main.cpp # Este archivo contiene la función main()
 )
 
-# Especificar los archivos de cabecera (opcional)
+# Specify the header files (optional, for better IDE integration)
 set(HEADERS
-    btree.h
-    cuckohashing.h
-    IFileUtils.h
-    personamodelo.h
+    models/btree.h
+    models/cuckohashing.h
+    src/cuckohashing.h
+    models/i-file-utils.h
+    models/personamodelo.h
+    models/dni-pos.h
 )
 
-# Cambiamos el nombre del ejecutable a algo más cool luego, atte. adrian
+# Set the executable name
 set(EXECUTABLE_NAME "adaBD")
 
-# Crear el ejecutable con el nombre especificado
+# Create the executable with the specified name
 add_executable(${EXECUTABLE_NAME} ${SOURCES} ${HEADERS})
-
-# Configurar las propiedades del ejecutable
-set_target_properties(${EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME ${EXECUTABLE_NAME})
