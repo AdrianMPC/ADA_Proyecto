@@ -11,8 +11,6 @@ El proyecto es para el trabajo final de estructuras de datos avanzadas de la Uni
 Para compilar, si no existe la carpeta build en la carpeta root del proyecto creala, dirigite a esa carpeta en la terminal y ejecuta:
 
 ```bash
-#!/bin/bash
-
 cmake ..
 cmake --build .
 ```
