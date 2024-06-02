@@ -97,32 +97,32 @@ CMakeFiles/adaBD.dir/src/firstload.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/adaBD.dir/src/firstload.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/andre/Documents/Coding/ADA_Proyecto/src/firstload.cpp -o CMakeFiles/adaBD.dir/src/firstload.s
 
-CMakeFiles/adaBD.dir/main.o: CMakeFiles/adaBD.dir/flags.make
-CMakeFiles/adaBD.dir/main.o: main.cpp
-CMakeFiles/adaBD.dir/main.o: CMakeFiles/adaBD.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/andre/Documents/Coding/ADA_Proyecto/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/adaBD.dir/main.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/adaBD.dir/main.o -MF CMakeFiles/adaBD.dir/main.o.d -o CMakeFiles/adaBD.dir/main.o -c /home/andre/Documents/Coding/ADA_Proyecto/main.cpp
+CMakeFiles/adaBD.dir/src/cuckohashing.o: CMakeFiles/adaBD.dir/flags.make
+CMakeFiles/adaBD.dir/src/cuckohashing.o: src/cuckohashing.cpp
+CMakeFiles/adaBD.dir/src/cuckohashing.o: CMakeFiles/adaBD.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/andre/Documents/Coding/ADA_Proyecto/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/adaBD.dir/src/cuckohashing.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/adaBD.dir/src/cuckohashing.o -MF CMakeFiles/adaBD.dir/src/cuckohashing.o.d -o CMakeFiles/adaBD.dir/src/cuckohashing.o -c /home/andre/Documents/Coding/ADA_Proyecto/src/cuckohashing.cpp
 
-CMakeFiles/adaBD.dir/main.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/adaBD.dir/main.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/andre/Documents/Coding/ADA_Proyecto/main.cpp > CMakeFiles/adaBD.dir/main.i
+CMakeFiles/adaBD.dir/src/cuckohashing.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/adaBD.dir/src/cuckohashing.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/andre/Documents/Coding/ADA_Proyecto/src/cuckohashing.cpp > CMakeFiles/adaBD.dir/src/cuckohashing.i
 
-CMakeFiles/adaBD.dir/main.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/adaBD.dir/main.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/andre/Documents/Coding/ADA_Proyecto/main.cpp -o CMakeFiles/adaBD.dir/main.s
+CMakeFiles/adaBD.dir/src/cuckohashing.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/adaBD.dir/src/cuckohashing.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/andre/Documents/Coding/ADA_Proyecto/src/cuckohashing.cpp -o CMakeFiles/adaBD.dir/src/cuckohashing.s
 
 # Object files for target adaBD
 adaBD_OBJECTS = \
 "CMakeFiles/adaBD.dir/src/btree.o" \
 "CMakeFiles/adaBD.dir/src/firstload.o" \
-"CMakeFiles/adaBD.dir/main.o"
+"CMakeFiles/adaBD.dir/src/cuckohashing.o"
 
 # External object files for target adaBD
 adaBD_EXTERNAL_OBJECTS =
 
 adaBD: CMakeFiles/adaBD.dir/src/btree.o
 adaBD: CMakeFiles/adaBD.dir/src/firstload.o
-adaBD: CMakeFiles/adaBD.dir/main.o
+adaBD: CMakeFiles/adaBD.dir/src/cuckohashing.o
 adaBD: CMakeFiles/adaBD.dir/build.make
 adaBD: CMakeFiles/adaBD.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/andre/Documents/Coding/ADA_Proyecto/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable adaBD"

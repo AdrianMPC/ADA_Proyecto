@@ -13,14 +13,14 @@ include_directories(${PROJECT_SOURCE_DIR}/models)
 set(SOURCES
     src/btree.cpp
     src/firstload.cpp
-    main.cpp # Este archivo contiene la función main()
+    src/cuckohashing.cpp 
+    # Este archivo contiene la función main()
 )
 
 # Specify the header files (optional, for better IDE integration)
 set(HEADERS
     models/btree.h
     models/cuckohashing.h
-    src/cuckohashing.h
     models/i-file-utils.h
     models/personamodelo.h
     models/dni-pos.h

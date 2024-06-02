@@ -130,21 +130,6 @@ adaBD/fast:
 .PHONY : adaBD/fast
 
 # target to build an object file
-main.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/main.o
-.PHONY : main.o
-
-# target to preprocess a source file
-main.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/main.i
-.PHONY : main.i
-
-# target to generate assembly for a file
-main.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/main.s
-.PHONY : main.s
-
-# target to build an object file
 src/btree.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/src/btree.o
 .PHONY : src/btree.o
@@ -158,6 +143,21 @@ src/btree.i:
 src/btree.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/src/btree.s
 .PHONY : src/btree.s
+
+# target to build an object file
+src/cuckohashing.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/src/cuckohashing.o
+.PHONY : src/cuckohashing.o
+
+# target to preprocess a source file
+src/cuckohashing.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/src/cuckohashing.i
+.PHONY : src/cuckohashing.i
+
+# target to generate assembly for a file
+src/cuckohashing.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/adaBD.dir/build.make CMakeFiles/adaBD.dir/src/cuckohashing.s
+.PHONY : src/cuckohashing.s
 
 # target to build an object file
 src/firstload.o:
@@ -183,12 +183,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... adaBD"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
 	@echo "... src/btree.o"
 	@echo "... src/btree.i"
 	@echo "... src/btree.s"
+	@echo "... src/cuckohashing.o"
+	@echo "... src/cuckohashing.i"
+	@echo "... src/cuckohashing.s"
 	@echo "... src/firstload.o"
 	@echo "... src/firstload.i"
 	@echo "... src/firstload.s"

@@ -17,6 +17,10 @@ int32_t CuckooHashing::m_secondHash(DniPos dniPos) {
     return (dniPos.dni / m_sizeTabla) % m_sizeTabla;
 }
 
+uint32_t CuckooHashing::getSize() {
+    return this->m_sizeTabla;
+}
+
 void CuckooHashing::m_rehash(DniPos dniPos, uint32_t pos) {
     int loopCount = 0;
     while (loopCount < m_sizeTabla) {
@@ -97,7 +101,7 @@ bool CuckooHashing::writeFile() {
     }
 
     // Write the size of the hash table
-    uint32_t size = CuckooHashing::getSize();
+    uint32_t size = getSize();
     file.write(reinterpret_cast<const char*>(&size), sizeof(size));
 
     // Write each element of the hash table

@@ -22,7 +22,3 @@ class CuckooHashing : public IFileUtils {
         bool writeFile() override;
         bool readFile() override;
 };
-
-uint32_t CuckooHashing::getSize() {
-    return this->m_sizeTabla;
-}
