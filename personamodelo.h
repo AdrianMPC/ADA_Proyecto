@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 
 // capacidades son placeholders

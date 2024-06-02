@@ -4,10 +4,13 @@
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+#!.vscode/tasks.json
+#!.vscode/launch.json
+#!.vscode/extensions.json
+#!.vscode/*.code-snippets
+
+build/*
+!build/
 
 # Local History for Visual Studio Code
 .history/
@@ -19,5 +22,9 @@
 # Ignore all local history of files
 .history
 .ionide
+# the dataset to use
+personas.txt
+personas_t.txt
+personas_t2.txt
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode

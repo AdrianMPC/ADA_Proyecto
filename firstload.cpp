@@ -1,15 +1,16 @@
-#include "personamodelo.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
-#include <cstring>  // strncpy
+#include <cstring>  
+#include "personamodelo.h"
 
 // abrir archivo txt con todas las personas
 // las personas están alamcenadas personas.txt
 // cada persona está deivida por un enter
 // función para leer los datos del archivo y convertirlos en objetos DatosPersona
+
 std::vector<DatosPersona> leerDatos(std::string filename) {
     std::vector<DatosPersona> personas;
     std::ifstream file(filename);
@@ -49,10 +50,23 @@ std::vector<DatosPersona> leerDatos(std::string filename) {
         strncpy(persona.nacionalidad, token.c_str(), sizeof(persona.nacionalidad) - 1);
         persona.nacionalidad[sizeof(persona.nacionalidad) - 1] = '\0';
 
+        // leer lugar de nacimiento
+        std::getline(iss, token, ';');
+        strncpy(persona.lugarnacimiento, token.c_str(), sizeof(persona.lugarnacimiento) - 1);
+        persona.lugarnacimiento[sizeof(persona.lugarnacimiento) - 1] = '\0';
+
         // leer direccion
         std::getline(iss, token, ';');
         strncpy(persona.direccion, token.c_str(), sizeof(persona.direccion) - 1);
         persona.direccion[sizeof(persona.direccion) - 1] = '\0';
+
+        std::getline(iss, token, ';');
+        persona.telefono = std::stoul(token);
+
+        // correo
+        std::getline(iss, token, ';');
+        std::strncpy(persona.correo, token.c_str(), sizeof(persona.correo) - 1);
+        persona.correo[sizeof(persona.correo) - 1] = '\0';
 
         // leer estado civil
         std::getline(iss, token, ';');
@@ -64,7 +78,7 @@ std::vector<DatosPersona> leerDatos(std::string filename) {
 
     return personas;
 }
-
+/*
 int main() {
     // Leer los datos y obtener el vector de DatosPersona
     std::vector<DatosPersona> personas = leerDatos("personas.txt");
@@ -82,3 +96,4 @@ int main() {
 
     return 0;
 }
+*/
