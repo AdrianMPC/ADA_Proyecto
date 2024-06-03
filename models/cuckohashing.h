@@ -14,11 +14,12 @@ class CuckooHashing : public IFileUtils {
         int32_t m_secondHash(DniPos dniPos);
         void m_rehash(DniPos dniPos, uint32_t pos);
         void m_rehashAll(DniPos dniPos);
+        bool writeFile() override;
+        bool readFile() override;
     public:
         CuckooHashing(uint32_t sizeTabla);
         bool insertDni(DniPos dniPos);
         int32_t searchDNI(uint32_t dni);
         uint32_t getSize();
-        bool writeFile() override;
-        bool readFile() override;
+       
 };

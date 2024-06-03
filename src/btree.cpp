@@ -1,4 +1,4 @@
-#include "btree.h"
+#include "../models/btree.h"
 #include <iostream>
 
 BTreeNode::BTreeNode(short _minDegree, bool _isLeaf){ 

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -14,7 +12,7 @@
 // cada persona está deivida por un enter
 // función para leer los datos del archivo y convertirlos en objetos DatosPersona
 
-std::vector<DatosPersona> readPeopleData(std::string filename) {
+static std::vector<DatosPersona> readPeopleData(std::string filename) {
     std::vector<DatosPersona> personas;
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -109,7 +107,7 @@ CuckooHashing writeCuckoo(T personas) {
     return cuckooHash;
 }
 
-
+/*
 int main() {
     // Get people
     std::vector<DatosPersona> personas = readPeopleData("personas.txt");
@@ -118,6 +116,7 @@ int main() {
 
     return 0;
 }
+*/
 /*
 int main() {
     // Leer los datos y obtener el vector de DatosPersona

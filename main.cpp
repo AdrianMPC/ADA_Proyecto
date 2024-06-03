@@ -2,12 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
-#include "btree.h"
+#include "models/btree.h"
 #include "src/firstload.cpp"
 
 // AQUI ESA LA IMPLEMENTACION DEL BTREE TEMPORAL
 
-/*
+
 DatosPersona* parseLine(const std::string& line) {
     std::stringstream ss(line);
     std::string token;
@@ -84,7 +84,7 @@ void loadDataAndTest(BTree& tree, const std::string& filename) {
 
 int main() {
     BTree tree(3); 
-    std::string file = "../personas_t.txt";
+    std::string file = "../personas.txt";
     loadDataAndTest(tree, file);
 
     std::cout << "Datos cargados" << std::endl;
@@ -129,4 +129,3 @@ int main() {
     system("pause");
     return 0;
 }
-*/

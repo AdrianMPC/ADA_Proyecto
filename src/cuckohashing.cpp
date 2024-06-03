@@ -1,9 +1,9 @@
-#include "models/cuckohashing.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include "models/dni-pos.h"
+#include "../models/cuckohashing.h"
+#include "../models/dni-pos.h"
 
 CuckooHashing::CuckooHashing(uint32_t sizeTabla) : m_sizeTabla(sizeTabla) {
     m_tabla.resize(sizeTabla, {0, -1});

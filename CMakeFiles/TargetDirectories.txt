@@ -1,3 +1,0 @@
-/home/andre/Documents/Coding/ADA_Proyecto/CMakeFiles/adaBD.dir
-/home/andre/Documents/Coding/ADA_Proyecto/CMakeFiles/edit_cache.dir
-/home/andre/Documents/Coding/ADA_Proyecto/CMakeFiles/rebuild_cache.dir

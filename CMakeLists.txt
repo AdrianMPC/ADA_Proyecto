@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.20)
 # Specify the project name
 project(ADA_proyecto)
 
@@ -14,16 +15,17 @@ set(SOURCES
     src/btree.cpp
     src/firstload.cpp
     src/cuckohashing.cpp 
+    main.cpp
     # Este archivo contiene la función main()
 )
 
 # Specify the header files (optional, for better IDE integration)
 set(HEADERS
-    models/btree.h
-    models/cuckohashing.h
-    models/i-file-utils.h
-    models/personamodelo.h
-    models/dni-pos.h
+   models/btree.h
+   models/cuckohashing.h
+   models/i-file-utils.h
+   models/personamodelo.h
+   models/dni-pos.h
 )
 
 # Set the executable name
