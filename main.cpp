@@ -7,7 +7,7 @@
 
 // AQUI ESA LA IMPLEMENTACION DEL BTREE TEMPORAL
 
-
+/*
 DatosPersona* parseLine(const std::string& line) {
     std::stringstream ss(line);
     std::string token;
@@ -127,5 +127,11 @@ int main() {
         std::cout << "Person with DNI " << dniToSearch << " not found." << std::endl;
     }
     system("pause");
+    return 0;
+}
+*/
+
+int main() {
+    BTree tree(3); 
     return 0;
 }
