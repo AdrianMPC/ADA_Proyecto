@@ -55,17 +55,32 @@ void BTreeTesting(){
     }
 }
 
+// LA FORMULA PARA DETERMINAR QUE POSICION USAR SIGUIENTE ES:
+// (TAMAÑO DE DATOS (QUE YA INCLUYE EL \0) + 1)
+// 
 void WriteDiskTest(){
     DiskManager* diskM = DiskManager::getInstance();
-    char dataso[20] = "bingo";
-    char dataso_leer[20];
-    diskM->writeDisk(1023,dataso,(short)20);
-    diskM->readDisk(1023,dataso_leer,20);
-
+    int dataso = 70799417;
+    char dataso_leer[9];
+    char test[10] = "hola12345"; // char de 9 + 1 el null
+    char test_leer[10];
+    diskM->borrarDatosNull(1024,sizeof(dataso_leer));
+    diskM->writeDiskInt(1024,dataso);
+    diskM->borrarDatosNull(1034,sizeof(test));
+    diskM->writeDisk(1034,test);
+    diskM->readDisk(1024,dataso_leer,sizeof(dataso_leer));
+    diskM->readDisk(1034,test_leer,sizeof(test_leer));
     std::cout<<dataso_leer<<"\n";
+    std::cout<<test_leer<<"\n";   
 }
 
 int main() {
     WriteDiskTest();
+    //int dato = 42;
+    //char buffer[2]; // Suficientemente grande para contener el entero como una cadena
+    
+   // sprintf(buffer, "%d", dato); // Convertir el entero a una cadena
+    
+    //std::cout<<buffer;
     return 0;
 }
