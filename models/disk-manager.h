@@ -14,6 +14,6 @@ class DiskManager{
         DiskManager(DiskManager &other) = delete;
         void operator=(const DiskManager &) = delete;
         static DiskManager* getInstance();
-        void writeDisk(uint32_t byte, char(&dato)[],short size);
+        void writeDisk(uint32_t byte, char(&dato)[], short size);
         bool readDisk(uint32_t byte, char(&dato_llenar)[]);
 };

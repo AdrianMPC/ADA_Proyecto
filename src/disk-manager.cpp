@@ -53,3 +53,7 @@ void DiskManager::writeDisk(uint32_t byte, char (&dato)[], short size){
         exit(-1);
     }
 }
+
+ bool DiskManager::readDisk(uint32_t byte, char(&dato_llenar)[]){
+    
+ }
