@@ -1,6 +1,7 @@
+#include <iostream>
 #include "../models/btree.h"
 #include "../models/personamodelo.h"
-#include <iostream>
+
 
 BTreeNode::BTreeNode(short _minDegree, bool _isLeaf){ 
     m_minDegree = _minDegree;

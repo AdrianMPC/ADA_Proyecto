@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "models/btree.h"
+#include "models/disk-manager.h"
 
 
 
@@ -54,6 +55,17 @@ void BTreeTesting(){
     }
 }
 
+void WriteDiskTest(){
+    DiskManager* diskM = DiskManager::getInstance();
+    char dataso[20] = "bingo";
+    char dataso_leer[20];
+    diskM->writeDisk(1023,dataso,(short)20);
+    diskM->readDisk(1023,dataso_leer,20);
+
+    std::cout<<dataso_leer<<"\n";
+}
+
 int main() {
+    WriteDiskTest();
     return 0;
 }
