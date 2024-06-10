@@ -6,7 +6,12 @@ class DiskManager{
     private:
         static DiskManager* m_pinstance;
         static std::mutex m_mutex;
-        const char dir[10] = "/dev/sda5";
+        const char m_dir[10] = "/dev/sda5";
+        template<typename T, size_t N>
+        size_t arraySize(T (&)[N]) {
+            return N;
+        }
+
     protected:
         DiskManager() = default;
         ~DiskManager() = default;
