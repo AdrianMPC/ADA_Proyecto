@@ -25,10 +25,22 @@ void DiskManager::writeDisk(uint32_t byte, char (&dato)[], short size){
         }
         if (lseek(fd, byte + size, SEEK_SET) == -1) {
             close(fd);
-            std::cerr << "Failed writing for " << dato << "with size: " << size << "in byte: " << byte <<"\n";
+            std::cerr << "Failed SET for " << dato << "with size: " << size << "in byte: " << byte <<"\n";
             throw std::system_error();
         }
         ssize_t bytes_written = write(fd, dato, size);
+        if (bytes_written == -1) {
+            close(fd);
+            std::cerr << "Failed writing for " << dato << "with size: " << size << "in byte: " << byte <<"\n";
+            throw std::system_error();
+        }
+        if (bytes_written != size) {
+            std::cerr << "Overflow in writing for " << dato << "with size: " << size << "in byte: " << byte <<"\n";
+            throw std::system_error();
+        }
+        if (close(fd) == -1) {
+            std::cerr << "No se cerro el disco" << std::endl;
+        }
     } 
     catch ( const std::invalid_argument& e ) {
         std::cerr << e.what() << " | No se pudo abrir la particion \n Cerrando programa \n resione cualquier tecla"<<std::endl;
@@ -40,31 +52,4 @@ void DiskManager::writeDisk(uint32_t byte, char (&dato)[], short size){
         std::cin.get();
         exit(-1);
     }
- 
-    // Asegurarse de que se haya abierto correctamente antes de continuar
-    if (lseek(fd, 1024 * 512, SEEK_SET) == -1) {
-        printf("Error al buscar en el archivo: %s\n", strerror(errno));
-        close(fd); // cerrar el descriptor de archivo antes de salir
-        return 1;
-    }
-
-    char buffer[] = "Hello, disca";
-    ssize_t bytes_written = write(fd, buffer, sizeof(buffer));
-    if (bytes_written == -1) {
-        printf("Error al escribir en el archivo: %s\n", strerror(errno));
-        close(fd); // cerrar el descriptor de archivo antes de salir
-        return 1;
-    } else if (bytes_written != sizeof(buffer)) {
-        printf("No se escribió toda la información en el archivo.\n");
-        close(fd); // cerrar el descriptor de archivo antes de salir
-        return 1;
-    }
-
-    if (close(fd) == -1) {
-        printf("Error al cerrar el archivo: %s\n", strerror(errno));
-        return 1;
-    }
-
-    printf("Se ha escrito: %s \n", buffer);
-    return 0;
 }

@@ -15,6 +15,7 @@ set(SOURCES
     src/btree.cpp
     src/firstload.cpp
     src/cuckohashing.cpp 
+    src/disk-manager.cpp
     main.cpp
     # Este archivo contiene la función main()
 )
@@ -26,10 +27,11 @@ set(HEADERS
    models/i-file-utils.h
    models/personamodelo.h
    models/dni-pos.h
+   models/disk-manager.h
 )
 
 # Set the executable name
-set(EXECUTABLE_NAME "adaBD")
+set(EXECUTABLE_NAME "edaBD")
 
 # Create the executable with the specified name
 add_executable(${EXECUTABLE_NAME} ${SOURCES} ${HEADERS})
