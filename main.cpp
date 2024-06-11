@@ -3,8 +3,8 @@
 #include <sstream>
 #include "models/btree.h"
 #include "models/disk-manager.h"
-
-
+#include "models/cuckohashing.h"
+#include "dni-pos.h"
 
 uint32_t parseLine(const std::string& line){
     std::stringstream ss(line);
@@ -74,7 +74,25 @@ void WriteDiskTest(){
     std::cout<<test_leer<<"\n";   
 }
 
+void writeDiskAndCuckoo(uint32_t dni){
+    DiskManager* diskM = DiskManager::getInstance();
+    int dataso = 70799417;
+
+    //diskM->writeDisk(1000010,test);
+
+    
+}
+
 int main() {
-   
+    CuckooHashing cuckoo(10);
+
+    for (int i = 0; i < 200; i++){
+        DniPos dniPos(i, i+84);
+        cuckoo.insertDni(dniPos);
+    }
+    
+    std::cout<<"Testing";
+    DniPos dniPos = cuckoo.searchDNI(20);
+    std::cout<<dniPos.dni << ":" << dniPos.pos;
     return 0;
 }

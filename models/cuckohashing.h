@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CUCKOOHASHING_H
+#define CUCKOOHASHING_H
 
 #include <vector>
 #include <cstdint>
@@ -19,7 +20,9 @@ class CuckooHashing : public IFileUtils {
     public:
         CuckooHashing(uint32_t sizeTabla);
         bool insertDni(DniPos dniPos);
-        int32_t searchDNI(uint32_t dni);
+        DniPos searchDNI(uint32_t dni); // Returns the DNI with the position in drive
         uint32_t getSize();
        
 };
+
+#endif // CUCKOOHASHING_H

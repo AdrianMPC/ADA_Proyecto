@@ -79,15 +79,15 @@ bool CuckooHashing::insertDni(DniPos dniPos) {
     return true;
 }
 
-int32_t CuckooHashing::searchDNI(uint32_t dni) {
+DniPos CuckooHashing::searchDNI(uint32_t dni) {
     int pos1 = m_firstHash({dni, 0});
     if (m_tabla[pos1].dni == dni) {
-        return pos1;
+        return m_tabla[pos1];
     }
 
     int pos2 = m_secondHash({dni, 0});
     if (m_tabla[pos2].dni == dni) {
-        return pos2;
+        return m_tabla[pos2];
     }
 
     return -1; // Not found
