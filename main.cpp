@@ -133,19 +133,20 @@ int main()
     // AND THEN IT WILL FIND IN THE HARD DRIVE THE PERSON DATA
     CROW_ROUTE(app, "/api/person").methods(crow::HTTPMethod::GET)([&](const crow::request &req)
                                                                   {
-        auto body = crow::json::load(req.body);
-        if (!body)
+        auto dniParam = req.url_params.get("dni");
+        if (!dniParam)
         {
             return crow::response(400, "Invalid body");
         }
+        
         uint32_t dni;
         try
         {
-            dni = body["dni"].i();
+            dni = std::stoul(dniParam);
         }
-        catch (const std::runtime_error &err)
+        catch (const std::exception &err)
         {
-            return crow::response(400, "Invalid body");
+            return crow::response(400, "Invalid DNI");
         }
 
         try
