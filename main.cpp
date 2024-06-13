@@ -112,6 +112,8 @@ int main()
         cuckoo.insertDni(dniPos);
     }
 
+    cuckoo.insertDni(88888888);
+
     std::cout << "Testing";
     DniPos dniPos = cuckoo.searchDNI(20);
     std::cout << dniPos.dni << ":" << dniPos.pos << std::endl;
