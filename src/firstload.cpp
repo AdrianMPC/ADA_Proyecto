@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <cstring>  
+#include <cstring>
 #include "../models/personamodelo.h"
 #include "../models/cuckohashing.h"
 
@@ -12,16 +12,19 @@
 // cada persona está deivida por un enter
 // función para leer los datos del archivo y convertirlos en objetos DatosPersona
 
-static std::vector<DatosPersona> readPeopleData(std::string filename) {
+static std::vector<DatosPersona> readPeopleData(std::string filename)
+{
     std::vector<DatosPersona> personas;
     std::ifstream file(filename);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         std::cerr << "Error opening file\n";
         return personas;
     }
 
     std::string line;
-    while (std::getline(file, line)) {
+    while (std::getline(file, line))
+    {
         std::istringstream iss(line);
         std::string token;
         DatosPersona persona;
@@ -71,7 +74,8 @@ static std::vector<DatosPersona> readPeopleData(std::string filename) {
 
         // leer estado civil
         std::getline(iss, token, ';');
-        persona.estadoCivil = token[0];
+        std::strncpy(persona.estadoCivil, token.c_str(), sizeof(persona.estadoCivil) - 1);
+        persona.estadoCivil[sizeof(persona.estadoCivil) - 1] = '\0';
 
         // Agregar el objeto persona al vector
         personas.push_back(persona);
@@ -81,14 +85,16 @@ static std::vector<DatosPersona> readPeopleData(std::string filename) {
 }
 
 template <typename T>
-CuckooHashing writeCuckoo(T personas) {
+CuckooHashing writeCuckoo(T personas)
+{
     // Create cuckoo hash table with an initial size of 10000
     CuckooHashing cuckooHash(10000);
 
     // Positions in disk
     uint32_t pos = 1024;
 
-    for (const auto& persona : personas) {
+    for (const auto &persona : personas)
+    {
         DniPos dniPos(persona.dni, pos);
         cuckooHash.insertDni(dniPos);
         pos += sizeof(persona); // Increment position, assuming fixed size for simplicity

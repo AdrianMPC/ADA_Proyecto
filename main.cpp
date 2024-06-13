@@ -102,6 +102,39 @@ void writeDiskAndCuckoo(uint32_t dni)
     // diskM->writeDisk(1000010,test);
 }
 
+// Helper function to copy strings safely
+void safeStrCopy(char *dest, const std::string &src, size_t destSize)
+{
+    strncpy(dest, src.c_str(), destSize - 1);
+    dest[destSize - 1] = '\0'; // Ensure null-termination
+}
+
+DatosPersona parseBody(const auto &body)
+{
+    DatosPersona datosPersona;
+
+    try
+    {
+        datosPersona.dni = body["dni"].u();
+        datosPersona.telefono = body["telefono"].u();
+
+        safeStrCopy(datosPersona.nombres, body["nombres"].s(), sizeof(datosPersona.nombres));
+        safeStrCopy(datosPersona.apellidos, body["apellidos"].s(), sizeof(datosPersona.apellidos));
+        safeStrCopy(datosPersona.direccion, body["direccion"].s(), sizeof(datosPersona.direccion));
+        safeStrCopy(datosPersona.nacimiento, body["nacimiento"].s(), sizeof(datosPersona.nacimiento));
+        safeStrCopy(datosPersona.nacionalidad, body["nacionalidad"].s(), sizeof(datosPersona.nacionalidad));
+        safeStrCopy(datosPersona.lugarnacimiento, body["lugarNacimiento"].s(), sizeof(datosPersona.lugarnacimiento));
+        safeStrCopy(datosPersona.correo, body["correo"].s(), sizeof(datosPersona.correo));
+        safeStrCopy(datosPersona.estadoCivil, body["estadoCivil"].s(), sizeof(datosPersona.estadoCivil));
+    }
+    catch (const std::exception &e)
+    {
+        throw std::runtime_error(std::string("Error parsing body: ") + e.what());
+    }
+
+    return datosPersona;
+}
+
 int main()
 {
     CuckooHashing cuckoo(10);
@@ -161,7 +194,7 @@ int main()
                 "Lima",
                 99999999,
                 "andre@gmail.com",
-                'S'
+                "s"
             };
 
             DniPos dniPos = cuckoo.searchDNI(dni);
@@ -171,7 +204,7 @@ int main()
                 {"direccion", datosPersona.direccion},
                 {"nacimiento", datosPersona.nacimiento},
                 {"nacionalidad", datosPersona.nacionalidad},
-                {"lugarnacimiento", datosPersona.lugarnacimiento},
+                {"lugarNacimiento", datosPersona.lugarnacimiento},
                 {"telefono", datosPersona.telefono},
                 {"correo", datosPersona.correo},
                 {"estadoCivil", datosPersona.estadoCivil},
@@ -184,7 +217,42 @@ int main()
             return crow::response(404, "DNI Not Found");
         } });
 
-    app.port(3000).multithreaded().run();
+    // PUT DNI ROUTE
+    // THIS ROUTE WILL RECEIVE A JSON WITH A DNI AND WILL CREATE A PERSON IN THE HARD DRIVE
+    CROW_ROUTE(app, "/api/person").methods(crow::HTTPMethod::POST)([&](const crow::request &req)
+                                                                   {
+        auto body = crow::json::load(req.body);
+        if (!body)
+        {
+            return crow::response(400, "Invalid body");
+        }
+
+        uint32_t dni;
+        try
+        {
+            DatosPersona datosPersona = parseBody(body);
+
+            return crow::response(200, crow::json::wvalue{
+                                           {"nombres", datosPersona.nombres},
+                                           {"apellidos", datosPersona.apellidos},
+                                           {"direccion", datosPersona.direccion},
+                                           {"nacimiento", datosPersona.nacimiento},
+                                           {"nacionalidad", datosPersona.nacionalidad},
+                                           {"lugarNacimiento", datosPersona.lugarnacimiento},
+                                           {"telefono", datosPersona.telefono},
+                                           {"correo", datosPersona.correo},
+                                           {"estadoCivil", datosPersona.estadoCivil},
+                                           {"dni", datosPersona.dni},
+                                       });
+        }
+        catch (const std::exception &err)
+        {
+            return crow::response(400, "Error");
+        } });
+
+    app.port(3000)
+        .multithreaded()
+        .run();
 
     return 0;
 }
