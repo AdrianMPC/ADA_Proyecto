@@ -12,5 +12,5 @@ typedef struct{
     char lugarnacimiento[21]; // Se reserva espacio para 20 caracteres más el carácter nulo \0
     uint32_t telefono; // 9 en char +1 null = 10
     char correo[41]; // Se reserva espacio para 40 caracteres más el carácter nulo \0
-    char estadoCivil; // Se usa solo un char para el estado civil 
+    char estadoCivil[2]; // Se usa solo un char para el estado civil + carácter nulo \0
 } DatosPersona;
