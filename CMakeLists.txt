@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Include directories with header files
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/models)
+include_directories(${PROJECT_SOURCE_DIR}/dependencies/Crow/include)
+
+# Include directory from boost / asio
+include_directories(/home/andrefdev/ADA/asio-1.30.2/include)
 
 # Specify the source files
 set(SOURCES
@@ -35,3 +39,7 @@ set(EXECUTABLE_NAME "edaBD")
 
 # Create the executable with the specified name
 add_executable(${EXECUTABLE_NAME} ${SOURCES} ${HEADERS})
+
+# Include libraries
+target_link_libraries(${EXECUTABLE_NAME} boost_system)
+target_link_libraries(${EXECUTABLE_NAME} pthread)
