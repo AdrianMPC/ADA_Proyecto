@@ -61,7 +61,7 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
 
 bool CuckooHashing::insertDni(const DniPos dniPos) {
     DniPos check = searchDNI(dniPos.dni);
-    if(check == NULL){std::cerr<<"[CUCKOOHASHING] ya existe el DNI\n"; return false;} // Ya existe
+    if(check.dni != 0){std::cerr<<"[CUCKOOHASHING] ya existe el DNI\n"; return false;} // Ya existe
     int pos1 = m_firstHash(dniPos);
     if (m_tabla[pos1].pos == -1) {
         m_tabla[pos1] = dniPos;
