@@ -4,7 +4,9 @@
 #include "models/btree.h"
 #include "models/disk-manager.h"
 #include "models/cuckohashing.h"
+#include "models/firstload.h"
 #include "dni-pos.h"
+
 
 // FOR API
 #include "utility"
@@ -13,6 +15,10 @@
 
 // PERSON STRUCT
 #include "models/personamodelo.h"
+
+// CONSTANTS
+#define INITIAL_TABLE_SIZE 40000000
+
 
 uint32_t parseLine(const std::string &line)
 {
@@ -72,6 +78,56 @@ void BTreeTesting()
     {
         std::cout << "NO se encontró el DNI #" << dniToSearch << "\n";
     }
+}
+
+void ReadPerson(uint32_t pos){
+	DatosPersona persona;
+
+	char _dni[9];
+	char num[10];
+	
+	DiskManager *diskM = DiskManager::getInstance();
+	uint32_t posDisco = pos;
+	// dni
+	diskM->readDisk(posDisco,_dni,sizeof(_dni));
+	posDisco += sizeof(_dni) + 1;
+	std::cout << _dni << " | ";
+	// nombres
+	diskM->readDisk(posDisco,persona.nombres,sizeof(persona.nombres));
+	posDisco += sizeof(persona.nombres) + 1;
+	std::cout << persona.nombres << " | ";
+	// apellidos
+	diskM->readDisk(posDisco,persona.apellidos,sizeof(persona.apellidos));
+	posDisco += sizeof(persona.apellidos) + 1;
+	std::cout << persona.apellidos << " | ";
+	// direccion
+	diskM->readDisk(posDisco,persona.direccion,sizeof(persona.direccion));
+	posDisco += sizeof(persona.direccion) + 1;
+	std::cout << persona.direccion << " | ";
+	// nacimiento
+	diskM->readDisk(posDisco,persona.nacimiento,sizeof(persona.nacimiento));
+	posDisco += sizeof(persona.nacimiento) + 1;
+	std::cout << persona.nacimiento << " | ";
+	// nacionalidad
+	diskM->readDisk(posDisco,persona.nacionalidad,sizeof(persona.nacionalidad));
+	posDisco += sizeof(persona.nacionalidad) + 1;
+	std::cout << persona.nacionalidad << " | ";
+	// lugarnacimiento
+	diskM->readDisk(posDisco,persona.lugarnacimiento,sizeof(persona.lugarnacimiento));
+	posDisco += sizeof(persona.lugarnacimiento) + 1;
+	std::cout << persona.lugarnacimiento << " | ";
+	// telefono
+	diskM->readDisk(posDisco,num,sizeof(num));
+	posDisco += sizeof(num) + 1;
+	std::cout << num << " | ";
+	// correo
+	diskM->readDisk(posDisco,persona.correo,sizeof(persona.correo));
+	posDisco += sizeof(persona.correo) + 1;
+	std::cout << persona.correo << " | ";
+	// correo
+	diskM->readDisk(posDisco,persona.estadoCivil,sizeof(persona.estadoCivil));
+	posDisco += sizeof(persona.estadoCivil) + 1;
+	std::cout << persona.estadoCivil << "\n";
 }
 
 // LA FORMULA PARA DETERMINAR QUE POSICION USAR SIGUIENTE ES:
@@ -137,19 +193,30 @@ DatosPersona parseBody(const auto &body)
 
 int main()
 {
-    CuckooHashing cuckoo(10);
-
-    for (int i = 0; i < 200; i++)
-    {
-        DniPos dniPos(i, i + 84);
-        cuckoo.insertDni(dniPos);
+    CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
+    // comprobamos si el .bin existe
+    std::ifstream file("cuckohash.bin", std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "[MAIN] cuckohash.bin no existe, buscando personas.txt\n";
+        LoadCuckoo load;
+        load.firstWrite(cuckoo,"personas_100.txt");
+        std::cout<<"[MAIN] Exito, generando el archivo"<<std::endl;
+    }  else {
+        std::cout<<"[MAIN] Cargar cuckoo en nuevo vector..."<<std::endl;
+        if(cuckoo->readFile()){
+        	std::cout<<"[MAIN] Vector online"<<std::endl;
+        	std::cout<<"[TEST] Imprimiendo los primeros 100 valores del vector"<<std::endl;
+  			cuckoo->imprimirVector(100);
+        }
     }
-
-    cuckoo.insertDni(88888888);
-
-    std::cout << "Testing";
-    DniPos dniPos = cuckoo.searchDNI(20);
-    std::cout << dniPos.dni << ":" << dniPos.pos << std::endl;
+    
+    
+    std::cout << "[TESTING] probando con DNI # 21047390" << std::endl;
+   	DniPos dniPos = cuckoo->searchDNI(21047390);
+   	if(dniPos.dni == 0) {std::cout << "DNI no existente" <<std::endl;} else {
+   		ReadPerson(dniPos.dni);
+   	}
+    
 
     // API WITH CROW
     crow::SimpleApp app;
@@ -197,7 +264,7 @@ int main()
                 "s"
             };
 
-            DniPos dniPos = cuckoo.searchDNI(dni);
+            DniPos dniPos = cuckoo->searchDNI(dni);
             return crow::response(200, crow::json::wvalue{
                 {"nombres", datosPersona.nombres},
                 {"apellidos", datosPersona.apellidos},

@@ -1,3 +1,6 @@
+#pragma once
+
+#include <sys/stat.h>
 #include <mutex>
 #include <fcntl.h>
 #include <stdexcept>
@@ -6,11 +9,12 @@
 #include <memory>
 #include <cstring>
 
+
 class DiskManager {
 private:
     static std::unique_ptr<DiskManager> m_pinstance;
     static std::mutex m_mutex;
-    const char* m_dir = "/dev/sda5";
+    const char* m_dir = "/dev/sda4";
 
 protected:
     DiskManager() = default;
@@ -20,6 +24,33 @@ public:
     void operator=(const DiskManager &) = delete;
 
     static DiskManager* getInstance();
+    
+    bool checkPartition(const char* partitionPath) {
+    	struct stat stat_buf;
+    	if (stat(partitionPath, &stat_buf) == -1) {
+        	std::cerr << "Error: La partición " << partitionPath << " no existe o no está accesible.\n";
+        	return false;
+    	}
+    	if (!S_ISBLK(stat_buf.st_mode)) {
+        	std::cerr << "Error: " << partitionPath << " no es un dispositivo de bloque.\n";
+        	return false;
+    	}
+
+    	if (access(partitionPath, W_OK) == -1) {
+        	std::cerr << "Error: No tienes permisos de escritura en la partición " << partitionPath << ".\n";
+        	return false;
+    	}
+    	return true;
+	}
+    
+    off_t getPartitionSize(const char* partitionPath) {
+    	struct stat stat_buf;
+    	if (stat(partitionPath, &stat_buf) == -1) {
+        	std::cerr << "Error: No se pudo obtener el tamaño de la partición.\n";
+        	return -1;
+    	}
+    	return stat_buf.st_size;
+	}
 
     void borrarDatosNull(uint32_t byte, short size) {
         try {
@@ -64,10 +95,27 @@ public:
 
     void writeDisk(uint32_t byte, const char* dato) {
         try {
-            int fd = open(m_dir, O_WRONLY);
-            if (fd == -1) {
-                throw std::invalid_argument(m_dir);
-            }
+        		// Verificar que la partición es accesible y writable
+    		if (!checkPartition(m_dir)) {
+        		throw std::runtime_error("Partición no accesible o no writable");
+    		}
+    		
+    		// Obtener el tamaño de la partición
+        	//off_t partitionSize = getPartitionSize(m_dir);
+        	//if (partitionSize == -1) {
+           // 	throw std::runtime_error("Error al obtener el tamaño de la partición");
+        	//}
+        	//if (byte >= partitionSize) {
+           // 	std::cerr << "Error: El byte " << byte << " está fuera de los límites de la partición -> "<<partitionSize <<"\n";
+           // 	throw std::runtime_error("Intento de posicionarse fuera de los límites de la partición");
+        //	}
+		
+    		// Abrir la partición
+    		int fd = open(m_dir, O_WRONLY);
+    		if (fd == -1) {
+        		throw std::invalid_argument("No se pudo abrir la partición");
+    		}
+
             if (lseek(fd, byte, SEEK_SET) == -1) {
                 close(fd);
                 std::cerr << " - [WRITE-CHAR] Failed SET for " << dato << " with size: " << strlen(dato) << " in byte: " << byte << "\n";

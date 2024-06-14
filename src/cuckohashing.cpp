@@ -40,7 +40,7 @@ void CuckooHashing::m_rehash(DniPos dniPos, uint32_t pos) {
     }
 
     // If we end up here, we need to rehash the entire table
-    std::cout << "Rehashing required!" << std::endl;
+    std::cout << "[CuckooHashing] Rehashing required!" << std::endl;
     m_rehashAll(dniPos);
     insertDni(dniPos); // Reinsert the key after rehashing
 }
@@ -59,7 +59,9 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
     }
 }
 
-bool CuckooHashing::insertDni(DniPos dniPos) {
+bool CuckooHashing::insertDni(const DniPos dniPos) {
+    DniPos check = searchDNI(dniPos.dni);
+    if(check.dni != 0){std::cerr<<"[CuckooHashing] ya existe el DNI\n"; return false;} // Ya existe
     int pos1 = m_firstHash(dniPos);
     if (m_tabla[pos1].pos == -1) {
         m_tabla[pos1] = dniPos;
@@ -90,13 +92,13 @@ DniPos CuckooHashing::searchDNI(uint32_t dni) {
         return m_tabla[pos2];
     }
 
-    return -1; // Not found
+    return {0,0}; // Not found
 }
 
 bool CuckooHashing::writeFile() {
     std::ofstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "Error opening file\n";
+        std::cerr << "[CuckooHashing] Error opening file\n";
         return false;
     }
 
@@ -116,7 +118,7 @@ bool CuckooHashing::writeFile() {
 bool CuckooHashing::readFile() {
     std::ifstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "Error opening file\n";
+        std::cerr << "[CuckooHashing] Error opening file\n";
         return false;
     }
 
@@ -133,4 +135,28 @@ bool CuckooHashing::readFile() {
 
     file.close();
     return true;
+}
+
+bool CuckooHashing::doesTableExists(){
+    std::ifstream file("cuckohash.bin", std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "[CuckooHashing] Error opening file\n";
+        return false;
+    }
+    return true;
+}
+
+uint32_t CuckooHashing::getlastPos(){
+    return lastPos;
+}
+
+void CuckooHashing::setlastPos(uint32_t _newlastpos){
+    lastPos = _newlastpos;
+} 
+
+void CuckooHashing::imprimirVector(uint32_t max){
+	for(uint32_t i = 0; i < max; i++){
+		DniPos dniPos = m_tabla[i];
+		std::cout<<"DNI: "<< dniPos.dni << " - Posicion: " << dniPos.pos << std::endl;
+	}
 }

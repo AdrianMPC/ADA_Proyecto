@@ -17,14 +17,18 @@ private:
     int32_t m_secondHash(DniPos dniPos);
     void m_rehash(DniPos dniPos, uint32_t pos);
     void m_rehashAll(DniPos dniPos);
-    bool writeFile() override;
-    bool readFile() override;
 
 public:
     CuckooHashing(uint32_t sizeTabla);
     bool insertDni(DniPos dniPos);
     DniPos searchDNI(uint32_t dni); // Returns the DNI with the position in drive
     uint32_t getSize();
+    bool doesTableExists();
+    bool writeFile() override;
+    bool readFile() override;
+    uint32_t getlastPos();
+    void setlastPos(uint32_t _newlastpos);
+    void imprimirVector(uint32_t max);
 };
 
 #endif // CUCKOOHASHING_H
