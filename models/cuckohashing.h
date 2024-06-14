@@ -25,6 +25,7 @@ public:
     bool insertDni(DniPos dniPos);
     DniPos searchDNI(uint32_t dni); // Returns the DNI with the position in drive
     uint32_t getSize();
+    bool doesTableExists();
 };
 
 #endif // CUCKOOHASHING_H

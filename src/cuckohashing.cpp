@@ -59,7 +59,9 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
     }
 }
 
-bool CuckooHashing::insertDni(DniPos dniPos) {
+bool CuckooHashing::insertDni(const DniPos dniPos) {
+    DniPos check = searchDNI(dniPos.dni);
+    if(check == NULL){std::cerr<<"[CUCKOOHASHING] ya existe el DNI\n"; return false;} // Ya existe
     int pos1 = m_firstHash(dniPos);
     if (m_tabla[pos1].pos == -1) {
         m_tabla[pos1] = dniPos;
@@ -132,5 +134,14 @@ bool CuckooHashing::readFile() {
     }
 
     file.close();
+    return true;
+}
+
+bool CuckooHashing::doesTableExists(){
+    std::ifstream file("cuckohash.bin", std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file\n";
+        return false;
+    }
     return true;
 }

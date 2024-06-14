@@ -4,7 +4,9 @@
 #include "models/btree.h"
 #include "models/disk-manager.h"
 #include "models/cuckohashing.h"
+#include "models/firstload.h"
 #include "dni-pos.h"
+
 
 // FOR API
 #include "utility"
@@ -137,19 +139,15 @@ DatosPersona parseBody(const auto &body)
 
 int main()
 {
-    CuckooHashing cuckoo(10);
+    // comprobamos si el .bin existe
+    std::ifstream file("cuckohash.bin", std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "[MAIN] cuckohash.bin no existe, buscando personas.txt\n";
+        LoadCuckoo load;
+        load.firstWrite("personas.txt");
+        std::cout<<"Exito"<<std::endl;
+    }   
 
-    for (int i = 0; i < 200; i++)
-    {
-        DniPos dniPos(i, i + 84);
-        cuckoo.insertDni(dniPos);
-    }
-
-    cuckoo.insertDni(88888888);
-
-    std::cout << "Testing";
-    DniPos dniPos = cuckoo.searchDNI(20);
-    std::cout << dniPos.dni << ":" << dniPos.pos << std::endl;
 
     // API WITH CROW
     crow::SimpleApp app;
