@@ -62,9 +62,11 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
 bool CuckooHashing::insertDni(const DniPos dniPos) {
     DniPos check = searchDNI(dniPos.dni);
     if(check.dni != 0){std::cerr<<"[CuckooHashing] ya existe el DNI\n"; return false;} // Ya existe
+   // std::cout<<"[CUCKOOHASH-INSERTDNI] TEST DNIPOS\n"<< dniPos.dni << " - " << dniPos.pos << "\n";
     int pos1 = m_firstHash(dniPos);
     if (m_tabla[pos1].pos == -1) {
         m_tabla[pos1] = dniPos;
+       // std::cout<<"[m_tabla] TEST DNIPOS\n"<< m_tabla[pos1].dni << " - " << m_tabla[pos1].pos << "\n";
         return true;
     }
 
@@ -74,6 +76,7 @@ bool CuckooHashing::insertDni(const DniPos dniPos) {
     int pos2 = m_secondHash(oldKey);
     if (m_tabla[pos2].pos == -1) {
         m_tabla[pos2] = oldKey;
+        //std::cout<<"[m_tabla2] TEST DNIPOS\n"<< m_tabla[pos2].dni << " - " << m_tabla[pos2].pos << "\n";
         return true;
     }
 
@@ -117,25 +120,39 @@ bool CuckooHashing::writeFile() {
 
 bool CuckooHashing::readFile() {
     std::ifstream file("cuckohash.bin", std::ios::binary);
-    if (!file.is_open()) {
-        std::cerr << "[CuckooHashing] Error opening file\n";
-        return false;
-    }
+        if (!file.is_open()) {
+            std::cerr << "[CuckooHashing] Error opening file\n";
+            return false;
+        }
 
-    // Read the size of the hash table
-    uint32_t size;
-    file.read(reinterpret_cast<char*>(&size), sizeof(size));
-    
-    m_tabla.resize(size);
+        // Leer el tamaño de la tabla hash
+        uint32_t size;
+        file.read(reinterpret_cast<char*>(&size), sizeof(size));
+        m_tabla.resize(size);
 
-    // Read each element of the hash table
-    for (auto& item : m_tabla) {
-        file.read(reinterpret_cast<char*>(&item), sizeof(item));
-    }
+        // Leer cada elemento de la tabla hash
+        for (DniPos& item : m_tabla) {
+            if (!readHashItem(file, item)) {
+                std::cerr << "[CuckooHashing] Error reading hash item\n";
+                file.close();
+                return false;
+            }
+        }
 
-    file.close();
-    return true;
+        file.close();
+        return true;
 }
+
+bool CuckooHashing::readHashItem(std::ifstream& file, DniPos& item) {
+        // Leer cada campo individualmente
+        if (!file.read(reinterpret_cast<char*>(&item.dni), sizeof(item.dni))) {
+            return false;
+        }
+        if (!file.read(reinterpret_cast<char*>(&item.pos), sizeof(item.pos))) {
+            return false;
+        }
+        return true;
+   }
 
 bool CuckooHashing::doesTableExists(){
     std::ifstream file("cuckohash.bin", std::ios::binary);
@@ -154,9 +171,11 @@ void CuckooHashing::setlastPos(uint32_t _newlastpos){
     lastPos = _newlastpos;
 } 
 
-void CuckooHashing::imprimirVector(uint32_t max){
-	for(uint32_t i = 0; i < max; i++){
-		DniPos dniPos = m_tabla[i];
-		std::cout<<"DNI: "<< dniPos.dni << " - Posicion: " << dniPos.pos << std::endl;
+void CuckooHashing::printVector(uint32_t max){
+	int i = 0;
+	for(DniPos item : m_tabla){
+		if(i > max){return;}
+		std::cout<<"DNI: "<< item.dni << " POS:" << item.pos << std::endl;
+		i++;
 	}
 }

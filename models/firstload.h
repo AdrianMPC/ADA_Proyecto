@@ -14,10 +14,11 @@
 class LoadCuckoo{
     public:
         LoadCuckoo() = default;
-        void firstWrite(CuckooHashing* cuck,std::string filename)
+        void firstWrite(CuckooHashing* cuck, std::string filename)
         {
             //std::vector<DniPos> vectorHash;
             // vamos a empezar desde 1mb de offset
+            std::cout<<"[FIRSTWRITE] cuckoo reference "<< cuck << std::endl;
             std::ifstream file(filename);
 
             if (!file.is_open())
@@ -44,6 +45,7 @@ class LoadCuckoo{
 
                 // set puntero
                 punteroDisco += sizeof(persona.estadoCivil) + 1; // 2+1 = 3 e.g 999997 + 3 = 1000000
+               // std::cout<<punteroDisco<<std::endl;
 
                 std::getline(iss, token, ';');
                 persona.dni = std::stoul(token); // data para hashear
@@ -54,8 +56,10 @@ class LoadCuckoo{
                 DniPos dnipos;
                 dnipos.dni = persona.dni;
                 dnipos.pos = punteroDisco;
+                
+               // std::cout<<"[CUCKOOHASH] TEST DNIPOS\n"<< dnipos.dni << " - " << dnipos.pos << "\n";
 
-                if(cuck->insertDni(dnipos.pos)){ 
+                if(cuck->insertDni(dnipos)){ 
                     // 2. Escribimos en disco
                     diskM->borrarDatosNull(punteroDisco, sizeof(_dni));
                     diskM->writeDisk(punteroDisco,_dni);
@@ -64,6 +68,7 @@ class LoadCuckoo{
                 }
 
                 punteroDisco += sizeof(_dni) + 1; // e.g 1000000 + 10 = 1000010
+               // std::cout<<punteroDisco<<std::endl;
                 // leer nombres, solo escribimos en disco
                 std::getline(iss, token, ';');
                 std::strncpy(persona.nombres, token.c_str(), sizeof(persona.nombres) - 1);
@@ -72,7 +77,7 @@ class LoadCuckoo{
 				diskM->borrarDatosNull(punteroDisco, sizeof(persona.nombres));
                 diskM->writeDisk(punteroDisco,persona.nombres);
                 punteroDisco += sizeof(persona.nombres) + 1; // e.g 1000010 + 41(+1) = 1000052
-
+				//std::cout<<punteroDisco<<std::endl;
                 // leer apellidos,  solo escribimos en disco
                 std::getline(iss, token, ';');
                 strncpy(persona.apellidos, token.c_str(), sizeof(persona.apellidos) - 1);
@@ -81,7 +86,7 @@ class LoadCuckoo{
 				diskM->borrarDatosNull(punteroDisco, sizeof(persona.apellidos));
                 diskM->writeDisk(punteroDisco,persona.apellidos);
                 punteroDisco += sizeof(persona.apellidos) + 1; // e.g 1000052 + 41(+1) = 1000094
-
+				//std::cout<<punteroDisco<<std::endl;
                 //
                 // leer direccion,  solo escribimos en disco
                 std::getline(iss, token, ';');
@@ -91,7 +96,7 @@ class LoadCuckoo{
 				diskM->borrarDatosNull(punteroDisco, sizeof(persona.direccion));
                 diskM->writeDisk(punteroDisco,persona.direccion);
                 punteroDisco += sizeof(persona.direccion) + 1; // e.g 1000094 + 31(+1) = 1000126
-
+				//std::cout<<punteroDisco<<std::endl;
                 //
                 // leer nacimiento,  solo escribimos en disco
                 std::getline(iss, token, ';');
@@ -100,18 +105,18 @@ class LoadCuckoo{
                 
 				diskM->borrarDatosNull(punteroDisco, sizeof(persona.nacimiento));
                 diskM->writeDisk(punteroDisco,persona.nacimiento);
-                punteroDisco += sizeof(persona.nacimiento) + 1; 
-
+                punteroDisco += sizeof(persona.nacimiento) + 1; // e.g 10000126 + 9(+1) = 1000136
+				//std::cout<<punteroDisco<<std::endl;
                 //
                 // leer nacionalidad,  solo escribimos en disco
                 std::getline(iss, token, ';');
                 strncpy(persona.nacionalidad, token.c_str(), sizeof(persona.nacionalidad) - 1);
                 persona.nacionalidad[sizeof(persona.nacionalidad) - 1] = '\0';
-
+				//std::cout<<"Nacionalidad. "<< sizeof(persona.nacionalidad) << std::endl;
 				diskM->borrarDatosNull(punteroDisco, sizeof(persona.nacionalidad));
                 diskM->writeDisk(punteroDisco,persona.nacionalidad);
-                punteroDisco += sizeof(persona.nacionalidad) + 1; 
-
+                punteroDisco += sizeof(persona.nacionalidad) + 1;  // e.g 1000136 + 4(+1) = 1000141
+				//std::cout<<punteroDisco<<std::endl;
                 //
                 // leer lugarnacimiento,  solo escribimos en disco
                 std::getline(iss, token, ';');
@@ -198,7 +203,9 @@ class LoadCuckoo{
                 
             }
             std::cout<<"[FIRSTLOAD] Se completo la escritura en disco, generando cuckoohash.bin\n";
-            writeCuckoo(cuck);
+            std::cout<<"[FIRSTLOAD] Imprimir vector actual\n";
+            cuck->printVector(100);
+            writeCuckoo(cuck);    
         }
 
     bool writeCuckoo(CuckooHashing* cuckooHash)

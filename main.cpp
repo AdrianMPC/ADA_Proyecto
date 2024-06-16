@@ -194,6 +194,7 @@ DatosPersona parseBody(const auto &body)
 int main()
 {
     CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
+    std::cout<<"[MAIN] cuckoo reference "<< cuckoo << std::endl;
     // comprobamos si el .bin existe
     std::ifstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
@@ -206,7 +207,9 @@ int main()
         if(cuckoo->readFile()){
         	std::cout<<"[MAIN] Vector online"<<std::endl;
         	std::cout<<"[TEST] Imprimiendo los primeros 100 valores del vector"<<std::endl;
-  			cuckoo->imprimirVector(100);
+  			cuckoo->printVector(100);
+        } else {
+        	std::cout<<"[ERROR] No se leyo!"<<std::endl;
         }
     }
     

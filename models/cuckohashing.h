@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <fstream>
 #include "./i-file-utils.h"
 #include "./dni-pos.h"
 
@@ -17,6 +18,7 @@ private:
     int32_t m_secondHash(DniPos dniPos);
     void m_rehash(DniPos dniPos, uint32_t pos);
     void m_rehashAll(DniPos dniPos);
+    bool readHashItem(std::ifstream& file, DniPos& item);
 
 public:
     CuckooHashing(uint32_t sizeTabla);
@@ -28,7 +30,7 @@ public:
     bool readFile() override;
     uint32_t getlastPos();
     void setlastPos(uint32_t _newlastpos);
-    void imprimirVector(uint32_t max);
+    void printVector(uint32_t max);
 };
 
 #endif // CUCKOOHASHING_H
