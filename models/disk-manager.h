@@ -14,7 +14,7 @@ class DiskManager {
 private:
     static std::unique_ptr<DiskManager> m_pinstance;
     static std::mutex m_mutex;
-    const char* m_dir = "/dev/sda4";
+    const char* m_dir = "/dev/sda3"; // IMPORTANTE CAMBIAR CON LA PARTICION DE TU PC (USA EL COMANDO DF)
 
 protected:
     DiskManager() = default;
@@ -148,7 +148,7 @@ public:
             exit(-1);
         }
     }
-
+	// DEPRECADO
     void writeDiskInt(uint32_t byte, const uint32_t dato) {
         try {
             int fd = open(m_dir, O_WRONLY);

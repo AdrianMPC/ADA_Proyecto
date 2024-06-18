@@ -5,8 +5,11 @@
 #include "../models/cuckohashing.h"
 #include "../models/dni-pos.h"
 
+const short DEFAULT_DNI_VALUE = 0;
+const short DEFAULT_POSITION_VALUE = 0;
+
 CuckooHashing::CuckooHashing(uint32_t sizeTabla) : m_sizeTabla(sizeTabla) {
-    m_tabla.resize(sizeTabla, {0, -1});
+    m_tabla.resize(sizeTabla, {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE});
 }
 
 int32_t CuckooHashing::m_firstHash(DniPos dniPos) {
@@ -26,13 +29,13 @@ void CuckooHashing::m_rehash(DniPos dniPos, uint32_t pos) {
     while (loopCount < m_sizeTabla) {
         std::swap(dniPos, m_tabla[pos]);
         pos = m_firstHash(dniPos);
-        if (m_tabla[pos].pos == -1) {
+        if (m_tabla[pos].pos == DEFAULT_POSITION_VALUE) {
             m_tabla[pos] = dniPos;
             return;
         }
         std::swap(dniPos, m_tabla[pos]);
         pos = m_secondHash(dniPos);
-        if (m_tabla[pos].pos == -1) {
+        if (m_tabla[pos].pos == DEFAULT_POSITION_VALUE) {
             m_tabla[pos] = dniPos;
             return;
         }
@@ -50,10 +53,10 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
 
     m_sizeTabla *= 2;
     m_tabla.clear();
-    m_tabla.resize(m_sizeTabla, {0, -1});
+    m_tabla.resize(m_sizeTabla, {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE});
 
     for (DniPos key : oldTable) {
-        if (key.pos != -1) {
+        if (key.pos != DEFAULT_POSITION_VALUE) {
             insertDni(key);
         }
     }
@@ -61,12 +64,10 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
 
 bool CuckooHashing::insertDni(const DniPos dniPos) {
     DniPos check = searchDNI(dniPos.dni);
-    if(check.dni != 0){std::cerr<<"[CuckooHashing] ya existe el DNI\n"; return false;} // Ya existe
-   // std::cout<<"[CUCKOOHASH-INSERTDNI] TEST DNIPOS\n"<< dniPos.dni << " - " << dniPos.pos << "\n";
+    if(check.dni != DEFAULT_DNI_VALUE){std::cerr<<"[CuckooHashing] ya existe el DNI\n"; return false;}
     int pos1 = m_firstHash(dniPos);
-    if (m_tabla[pos1].pos == -1) {
+    if (m_tabla[pos1].pos == DEFAULT_POSITION_VALUE) {
         m_tabla[pos1] = dniPos;
-       // std::cout<<"[m_tabla] TEST DNIPOS\n"<< m_tabla[pos1].dni << " - " << m_tabla[pos1].pos << "\n";
         return true;
     }
 
@@ -74,9 +75,8 @@ bool CuckooHashing::insertDni(const DniPos dniPos) {
     m_tabla[pos1] = dniPos;
 
     int pos2 = m_secondHash(oldKey);
-    if (m_tabla[pos2].pos == -1) {
+    if (m_tabla[pos2].pos == DEFAULT_POSITION_VALUE) {
         m_tabla[pos2] = oldKey;
-        //std::cout<<"[m_tabla2] TEST DNIPOS\n"<< m_tabla[pos2].dni << " - " << m_tabla[pos2].pos << "\n";
         return true;
     }
 
@@ -85,12 +85,12 @@ bool CuckooHashing::insertDni(const DniPos dniPos) {
 }
 
 DniPos CuckooHashing::searchDNI(uint32_t dni) {
-    int pos1 = m_firstHash({dni, 0});
+    int pos1 = m_firstHash({dni, DEFAULT_POSITION_VALUE});
     if (m_tabla[pos1].dni == dni) {
         return m_tabla[pos1];
     }
 
-    int pos2 = m_secondHash({dni, 0});
+    int pos2 = m_secondHash({dni, DEFAULT_POSITION_VALUE});
     if (m_tabla[pos2].dni == dni) {
         return m_tabla[pos2];
     }
@@ -171,6 +171,7 @@ void CuckooHashing::setlastPos(uint32_t _newlastpos){
     lastPos = _newlastpos;
 } 
 
+// NO USAR
 void CuckooHashing::printVector(uint32_t max){
 	int i = 0;
 	for(DniPos item : m_tabla){

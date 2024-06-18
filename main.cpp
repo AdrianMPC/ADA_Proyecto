@@ -80,55 +80,38 @@ void BTreeTesting()
     }
 }
 
-void ReadPerson(uint32_t pos){
-	DatosPersona persona;
+void ReadPerson(uint32_t pos) {
+    const short DNI_SIZE = 9;
+    const short PHONE_SIZE = 10;
 
-	char _dni[9];
-	char num[10];
-	
-	DiskManager *diskM = DiskManager::getInstance();
-	uint32_t posDisco = pos;
-	// dni
-	diskM->readDisk(posDisco,_dni,sizeof(_dni));
-	posDisco += sizeof(_dni) + 1;
-	std::cout << _dni << " | ";
-	// nombres
-	diskM->readDisk(posDisco,persona.nombres,sizeof(persona.nombres));
-	posDisco += sizeof(persona.nombres) + 1;
-	std::cout << persona.nombres << " | ";
-	// apellidos
-	diskM->readDisk(posDisco,persona.apellidos,sizeof(persona.apellidos));
-	posDisco += sizeof(persona.apellidos) + 1;
-	std::cout << persona.apellidos << " | ";
-	// direccion
-	diskM->readDisk(posDisco,persona.direccion,sizeof(persona.direccion));
-	posDisco += sizeof(persona.direccion) + 1;
-	std::cout << persona.direccion << " | ";
-	// nacimiento
-	diskM->readDisk(posDisco,persona.nacimiento,sizeof(persona.nacimiento));
-	posDisco += sizeof(persona.nacimiento) + 1;
-	std::cout << persona.nacimiento << " | ";
-	// nacionalidad
-	diskM->readDisk(posDisco,persona.nacionalidad,sizeof(persona.nacionalidad));
-	posDisco += sizeof(persona.nacionalidad) + 1;
-	std::cout << persona.nacionalidad << " | ";
-	// lugarnacimiento
-	diskM->readDisk(posDisco,persona.lugarnacimiento,sizeof(persona.lugarnacimiento));
-	posDisco += sizeof(persona.lugarnacimiento) + 1;
-	std::cout << persona.lugarnacimiento << " | ";
-	// telefono
-	diskM->readDisk(posDisco,num,sizeof(num));
-	posDisco += sizeof(num) + 1;
-	std::cout << num << " | ";
-	// correo
-	diskM->readDisk(posDisco,persona.correo,sizeof(persona.correo));
-	posDisco += sizeof(persona.correo) + 1;
-	std::cout << persona.correo << " | ";
-	// correo
-	diskM->readDisk(posDisco,persona.estadoCivil,sizeof(persona.estadoCivil));
-	posDisco += sizeof(persona.estadoCivil) + 1;
-	std::cout << persona.estadoCivil << "\n";
+    DatosPersona persona;
+    char _dni[DNI_SIZE];
+    char num[PHONE_SIZE];
+
+    DiskManager *diskM = DiskManager::getInstance();
+    uint32_t posDisco = pos;
+
+    auto readField = [&](const char* fieldName, char* field, short size) {
+        diskM->readDisk(posDisco, field, size);
+        posDisco += size + 1;
+        std::cout << fieldName << ": " << field << "\n";
+    };
+
+    std::cout << "Datos de las personas: \n";
+    readField("DNI", _dni, DNI_SIZE);
+    readField("Nombres", persona.nombres, sizeof(persona.nombres));
+    readField("Apellidos", persona.apellidos, sizeof(persona.apellidos));
+    readField("Nacimiento", persona.nacimiento, sizeof(persona.nacimiento));
+    readField("Nacionalidad", persona.nacionalidad, sizeof(persona.nacionalidad));
+    readField("Direccion", persona.direccion, sizeof(persona.direccion));
+    readField("Lugar Nacimiento", persona.lugarnacimiento, sizeof(persona.lugarnacimiento));
+    readField("Telefono", num, PHONE_SIZE);
+    readField("Correo", persona.correo, sizeof(persona.correo));
+    readField("Estado Civil", persona.estadoCivil, sizeof(persona.estadoCivil));
+
+    std::cout << "\n";
 }
+
 
 // LA FORMULA PARA DETERMINAR QUE POSICION USAR SIGUIENTE ES:
 // (TAMAÑO DE DATOS (QUE YA INCLUYE EL \0) + 1)
@@ -191,34 +174,71 @@ DatosPersona parseBody(const auto &body)
     return datosPersona;
 }
 
+bool isValidInteger(const std::string& str) {
+    for (char c : str) {
+        if (!std::isdigit(c)) {
+            return false;
+        }
+    }
+    return !str.empty();  
+}
+
+// Función para pedir y validar el DNI del usuario
+uint32_t askDNI() {
+    std::string input;
+    uint32_t dni;
+
+    while (true) {
+        std::cout << "Ingrese su DNI (escriba 0 para finalizar el test de consulta DNI): ";
+        std::cin >> input;
+        if (isValidInteger(input)) {
+            dni = std::stoul(input);
+            break;
+        } else {
+            std::cout << "Entrada inválida. El DNI debe ser un número entero positivo.\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+
+    return dni;
+}
+
 int main()
 {
+	//TODO Cambiar esto para que no sea una aberracion en el main (talvez una clase)
     CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
-    std::cout<<"[MAIN] cuckoo reference "<< cuckoo << std::endl;
     // comprobamos si el .bin existe
     std::ifstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "[MAIN] cuckohash.bin no existe, buscando personas.txt\n";
+        std::cerr << "[MAIN-LOG] cuckohash.bin no existe, buscando personas.txt\n";
         LoadCuckoo load;
         load.firstWrite(cuckoo,"personas_100.txt");
-        std::cout<<"[MAIN] Exito, generando el archivo"<<std::endl;
+        std::cout<<"[MAIN-LOG] Exito, generando el archivo"<<std::endl;
     }  else {
-        std::cout<<"[MAIN] Cargar cuckoo en nuevo vector..."<<std::endl;
+        std::cout<<"[MAIN-LOG] Cargando tablaHash desde archivo cuckohash.bin"<<std::endl;
         if(cuckoo->readFile()){
-        	std::cout<<"[MAIN] Vector online"<<std::endl;
-        	std::cout<<"[TEST] Imprimiendo los primeros 100 valores del vector"<<std::endl;
-  			cuckoo->printVector(100);
+        	std::cout<<"[MAIN-LOG] Vector online"<<std::endl;
+  			//cuckoo->printVector(100);
         } else {
-        	std::cout<<"[ERROR] No se leyo!"<<std::endl;
+        	std::cout<<"[MAIN-ERROR] Hubo un error al leer el archivo"<<std::endl;
         }
     }
     
-    
-    std::cout << "[TESTING] probando con DNI # 21047390" << std::endl;
-   	DniPos dniPos = cuckoo->searchDNI(21047390);
-   	if(dniPos.dni == 0) {std::cout << "DNI no existente" <<std::endl;} else {
-   		ReadPerson(dniPos.dni);
-   	}
+    while(true){
+    	uint32_t dni = askDNI();
+    	if(dni == 0){break;}
+    	DniPos dniPos = cuckoo->searchDNI(dni);
+	
+    	std::cout << "[MAIN-LOG] Buscando DNI: " << dniPos.dni << " y POS: " << dniPos.pos << std::endl;
+    	
+    	if (dniPos.dni == 0) {
+        	std::cout << "[MAIN-LOG] DNI no encontrado" << std::endl;
+    	} else {
+        	ReadPerson(dniPos.pos);  
+    	}
+    }
+  	
     
 
     // API WITH CROW
