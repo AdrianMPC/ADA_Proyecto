@@ -1,4 +1,4 @@
-#include <iostream>
+                                                                                                                                                                                                                                                                                                                                                                                   #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -125,7 +125,8 @@ public:
             	diskM->writeDisk(punteroDisco, persona.estadoCivil);
 	
             	if (cuck->getlastPos() < punteroDisco) {
-                	cuck->setlastPos(punteroDisco);
+            		uint32_t pos = punteroDisco + sizeof(persona.estadoCivil);
+                	cuck->setlastPos(pos);
             	}
             	archivosEscritos++;
 	
@@ -149,7 +150,7 @@ public:
                 std::cerr << "[FIRSTLOAD] No se pudo escribir el DNI: " << _dni << " en la posicion " << punteroDisco << " bytes" << std::endl;
             }   
         }
-        
+        std::cout<<"[FIRSTLOAD] Ultima posicion escrita fue en el byte: " << cuck->getlastPos() << "\n";
         std::cout << "[FIRSTLOAD] Se completo la escritura en disco, generando cuckoohash.bin\n";
         writeCuckoo(cuck);
     }

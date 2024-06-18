@@ -3,10 +3,9 @@
 #include <vector>
 #include <algorithm>
 #include "../models/cuckohashing.h"
+#include "../models/personamodelo.h"
 #include "../models/dni-pos.h"
 
-const short DEFAULT_DNI_VALUE = 0;
-const short DEFAULT_POSITION_VALUE = 0;
 
 CuckooHashing::CuckooHashing(uint32_t sizeTabla) : m_sizeTabla(sizeTabla) {
     m_tabla.resize(sizeTabla, {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE});
@@ -29,13 +28,13 @@ void CuckooHashing::m_rehash(DniPos dniPos, uint32_t pos) {
     while (loopCount < m_sizeTabla) {
         std::swap(dniPos, m_tabla[pos]);
         pos = m_firstHash(dniPos);
-        if (m_tabla[pos].pos == DEFAULT_POSITION_VALUE) {
+        if (m_tabla[pos].dni == DEFAULT_POSITION_VALUE) {
             m_tabla[pos] = dniPos;
             return;
         }
         std::swap(dniPos, m_tabla[pos]);
         pos = m_secondHash(dniPos);
-        if (m_tabla[pos].pos == DEFAULT_POSITION_VALUE) {
+        if (m_tabla[pos].dni == DEFAULT_POSITION_VALUE) {
             m_tabla[pos] = dniPos;
             return;
         }
@@ -66,7 +65,7 @@ bool CuckooHashing::insertDni(const DniPos dniPos) {
     DniPos check = searchDNI(dniPos.dni);
     if(check.dni != DEFAULT_DNI_VALUE){std::cerr<<"[CuckooHashing] ya existe el DNI\n"; return false;}
     int pos1 = m_firstHash(dniPos);
-    if (m_tabla[pos1].pos == DEFAULT_POSITION_VALUE) {
+    if (m_tabla[pos1].pos == DEFAULT_POSITION_VALUE) { 
         m_tabla[pos1] = dniPos;
         return true;
     }
@@ -98,6 +97,52 @@ DniPos CuckooHashing::searchDNI(uint32_t dni) {
     return {0,0}; // Not found
 }
 
+bool CuckooHashing::deleteDNI(uint32_t dni) {
+    DniPos dniPos = searchDNI(dni);
+    if (dniPos.dni == DEFAULT_DNI_VALUE) {
+        std::cerr << "[CuckooHashing] DNI not found\n";
+        return false;
+    }
+
+    bool deleted = false;
+    uint32_t pos1 = m_firstHash(dniPos);
+    if (m_tabla[pos1].dni == dni) {
+        m_tabla[pos1] = {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE};
+        deleted = true;
+    } else {
+        uint32_t pos2 = m_secondHash(dniPos);
+        if (m_tabla[pos2].dni == dni) {
+            m_tabla[pos2] = {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE};
+            deleted = true;
+        } else {
+            std::cerr << "[CuckooHashing] Error deleting DNI\n";
+            return false;
+        }
+    }
+
+    if (deleted) {
+        uint32_t lastPosition = getlastPos();
+        DatosPersona persona;
+        const short PERSONA_DATA_SIZE = sizeof(char[9]) + sizeof(persona.nombres)  + sizeof(persona.apellidos)  +
+                            sizeof(persona.nacimiento)  + sizeof(persona.nacionalidad)  +
+                            sizeof(persona.direccion)  + sizeof(persona.lugarnacimiento) +
+                            sizeof(char[10]) + sizeof(persona.correo) + sizeof(persona.estadoCivil);
+        if ((lastPosition - PERSONA_DATA_SIZE) == dniPos.pos - 1) 
+        {
+        	std::cerr << "[CuckooHashing-deleted] El puntero de disco necesita ser reorganizado\n";
+        	uint32_t pos = dniPos.pos - 1; // retrocede una persona
+        	std::cerr << "[CuckooHashing-deleted] Nueva posicion de puntero: "<< pos << "bytes.\n";
+            setlastPos(pos);
+        }
+    }
+
+    if (getlastPos() < 1000000) {
+        setlastPos(999999); // numero magico, no tocar
+    }
+
+    return true;
+}
+
 bool CuckooHashing::writeFile() {
     std::ofstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
@@ -119,28 +164,43 @@ bool CuckooHashing::writeFile() {
 }
 
 bool CuckooHashing::readFile() {
+	const short DNI_SIZE = 9;
+    const short PHONE_SIZE = 10;
+    
     std::ifstream file("cuckohash.bin", std::ios::binary);
-        if (!file.is_open()) {
-            std::cerr << "[CuckooHashing] Error opening file\n";
+    if (!file.is_open()) {
+        std::cerr << "[CuckooHashing] Error opening file\n";
+        return false;
+    }
+    
+    DatosPersona persona;
+    // Leer el tamaño de la tabla hash
+    uint32_t size;
+    file.read(reinterpret_cast<char*>(&size), sizeof(size));
+    m_tabla.resize(size);
+    
+    const short PERSONA_DATA_SIZE = DNI_SIZE + sizeof(persona.nombres) + sizeof(persona.apellidos) +
+                                    sizeof(persona.nacimiento) + sizeof(persona.nacionalidad) +
+                                    sizeof(persona.direccion) + sizeof(persona.lugarnacimiento) +
+                                    PHONE_SIZE + sizeof(persona.correo) + sizeof(persona.estadoCivil);
+
+    // Leer cada elemento de la tabla hash
+    for (DniPos& item : m_tabla) {
+        if (!readHashItem(file, item)) {
+            std::cerr << "[CuckooHashing] Error reading hash item\n";
+            file.close();
             return false;
         }
-
-        // Leer el tamaño de la tabla hash
-        uint32_t size;
-        file.read(reinterpret_cast<char*>(&size), sizeof(size));
-        m_tabla.resize(size);
-
-        // Leer cada elemento de la tabla hash
-        for (DniPos& item : m_tabla) {
-            if (!readHashItem(file, item)) {
-                std::cerr << "[CuckooHashing] Error reading hash item\n";
-                file.close();
-                return false;
-            }
-        }
-
-        file.close();
-        return true;
+        
+         if (getlastPos() < item.pos) {
+    		uint32_t newLastPos = item.pos + (PERSONA_DATA_SIZE-1);
+    		setlastPos(newLastPos);
+    	}
+    }
+    
+    file.close();
+    std::cout<<"[CUCKOOHASHING-READFILE] Ultima posicion escrita fue en el byte: " << getlastPos() << "\n";
+    return true;
 }
 
 bool CuckooHashing::readHashItem(std::ifstream& file, DniPos& item) {
@@ -152,7 +212,7 @@ bool CuckooHashing::readHashItem(std::ifstream& file, DniPos& item) {
             return false;
         }
         return true;
-   }
+}
 
 bool CuckooHashing::doesTableExists(){
     std::ifstream file("cuckohash.bin", std::ios::binary);

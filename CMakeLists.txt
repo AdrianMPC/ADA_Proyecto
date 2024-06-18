@@ -19,6 +19,7 @@ set(SOURCES
     src/btree.cpp
     src/cuckohashing.cpp 
     src/disk-manager.cpp
+    src/personamanager.cpp
     main.cpp
     # Este archivo contiene la función main()
 )
@@ -32,6 +33,7 @@ set(HEADERS
    models/dni-pos.h
    models/disk-manager.h
    models/firstload.h
+   models/personamanager.h
 )
 
 # Set the executable name

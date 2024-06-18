@@ -5,7 +5,8 @@
 #include "models/disk-manager.h"
 #include "models/cuckohashing.h"
 #include "models/firstload.h"
-#include "dni-pos.h"
+#include "models/dni-pos.h"
+#include "models/personamanager.h"
 
 
 // FOR API
@@ -81,35 +82,7 @@ void BTreeTesting()
 }
 
 void ReadPerson(uint32_t pos) {
-    const short DNI_SIZE = 9;
-    const short PHONE_SIZE = 10;
-
-    DatosPersona persona;
-    char _dni[DNI_SIZE];
-    char num[PHONE_SIZE];
-
-    DiskManager *diskM = DiskManager::getInstance();
-    uint32_t posDisco = pos;
-
-    auto readField = [&](const char* fieldName, char* field, short size) {
-        diskM->readDisk(posDisco, field, size);
-        posDisco += size + 1;
-        std::cout << fieldName << ": " << field << "\n";
-    };
-
-    std::cout << "Datos de las personas: \n";
-    readField("DNI", _dni, DNI_SIZE);
-    readField("Nombres", persona.nombres, sizeof(persona.nombres));
-    readField("Apellidos", persona.apellidos, sizeof(persona.apellidos));
-    readField("Nacimiento", persona.nacimiento, sizeof(persona.nacimiento));
-    readField("Nacionalidad", persona.nacionalidad, sizeof(persona.nacionalidad));
-    readField("Direccion", persona.direccion, sizeof(persona.direccion));
-    readField("Lugar Nacimiento", persona.lugarnacimiento, sizeof(persona.lugarnacimiento));
-    readField("Telefono", num, PHONE_SIZE);
-    readField("Correo", persona.correo, sizeof(persona.correo));
-    readField("Estado Civil", persona.estadoCivil, sizeof(persona.estadoCivil));
-
-    std::cout << "\n";
+   
 }
 
 
@@ -189,7 +162,7 @@ uint32_t askDNI() {
     uint32_t dni;
 
     while (true) {
-        std::cout << "Ingrese su DNI (escriba 0 para finalizar el test de consulta DNI): ";
+        std::cout << "Ingrese su DNI: ";
         std::cin >> input;
         if (isValidInteger(input)) {
             dni = std::stoul(input);
@@ -204,10 +177,20 @@ uint32_t askDNI() {
     return dni;
 }
 
+void printMenu() {
+    std::cout << "\nMenu TEST:\n";
+    std::cout << "1. Read Person\n";
+    std::cout << "2. Write Person\n";
+    std::cout << "3. Delete Person\n";
+    std::cout << "4. Exit TEST\n";
+    std::cout << "Enter your choice: ";
+}
+
 int main()
 {
 	//TODO Cambiar esto para que no sea una aberracion en el main (talvez una clase)
     CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
+    PersonaManager personaManager(cuckoo);
     // comprobamos si el .bin existe
     std::ifstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
@@ -224,21 +207,82 @@ int main()
         	std::cout<<"[MAIN-ERROR] Hubo un error al leer el archivo"<<std::endl;
         }
     }
-    
-    while(true){
-    	uint32_t dni = askDNI();
-    	if(dni == 0){break;}
-    	DniPos dniPos = cuckoo->searchDNI(dni);
-	
-    	std::cout << "[MAIN-LOG] Buscando DNI: " << dniPos.dni << " y POS: " << dniPos.pos << std::endl;
-    	
-    	if (dniPos.dni == 0) {
-        	std::cout << "[MAIN-LOG] DNI no encontrado" << std::endl;
-    	} else {
-        	ReadPerson(dniPos.pos);  
-    	}
-    }
   	
+  	int choice;
+    do {
+        printMenu();
+        std::cin >> choice;
+        std::cin.ignore(); // Ignore newline character left in the buffer
+
+        switch (choice) {
+            case 1: {
+               	uint32_t dni = askDNI();
+    			DniPos dniPos = cuckoo->searchDNI(dni);
+			
+    			std::cout << "[MAIN-LOG] Buscando DNI: " << dniPos.dni << " y POS: " << dniPos.pos << std::endl;
+    			
+    			if (dniPos.dni == 0) {
+        			std::cout << "[MAIN-LOG] DNI no encontrado" << std::endl;
+    			} else {
+        			personaManager.readPerson(dniPos.pos);  
+    			}
+                break;
+            }
+            case 2: {
+                DatosPersona persona;
+                persona.dni = 12345678;
+				persona.telefono = 945326723;
+				
+				std::strncpy(persona.nombres, "Pedro Miguel", sizeof(persona.nombres) - 1);
+                persona.nombres[sizeof(persona.nombres) - 1] = '\0';
+
+                std::strncpy(persona.apellidos, "Hernández Martínez", sizeof(persona.apellidos) - 1);
+                persona.apellidos[sizeof(persona.apellidos) - 1] = '\0';
+
+                std::strncpy(persona.direccion, "Pucallpa, Manantay", sizeof(persona.direccion) - 1);
+                persona.direccion[sizeof(persona.direccion) - 1] = '\0';
+
+                std::strncpy(persona.nacimiento, "20/9/78", sizeof(persona.nacimiento) - 1);
+                persona.nacimiento[sizeof(persona.nacimiento) - 1] = '\0';
+
+                std::strncpy(persona.nacionalidad, "EXT", sizeof(persona.nacionalidad) - 1);
+                persona.nacionalidad[sizeof(persona.nacionalidad) - 1] = '\0';
+
+                std::strncpy(persona.lugarnacimiento, "Barcelona", sizeof(persona.lugarnacimiento) - 1);
+                persona.lugarnacimiento[sizeof(persona.lugarnacimiento) - 1] = '\0';
+
+                std::strncpy(persona.correo, "luis7@gmail.com", sizeof(persona.correo) - 1);
+                persona.correo[sizeof(persona.correo) - 1] = '\0';
+
+                std::strncpy(persona.estadoCivil, "S", sizeof(persona.estadoCivil) - 1);
+                persona.estadoCivil[sizeof(persona.estadoCivil) - 1] = '\0';
+
+                if (personaManager.writePerson(persona)) {
+                    std::cout << "Person written successfully.\n";
+                } else {
+                    std::cout << "Error writing person.\n";
+                }
+                break;
+            }
+            case 3: {
+                uint32_t dni;
+                std::cout << "Enter DNI to delete: ";
+                std::cin >> dni;
+                if (personaManager.deletePerson(dni)) {
+                    std::cout << "Person deleted successfully.\n";
+                } else {
+                    std::cout << "Error deleting person.\n";
+                }
+                break;
+            }
+            case 4:
+                std::cout << "Exiting TEST...\n";
+                break;
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 4);
+
     
 
     // API WITH CROW

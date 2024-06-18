@@ -21,9 +21,12 @@ private:
     bool readHashItem(std::ifstream& file, DniPos& item);
 
 public:
+	const uint32_t DEFAULT_DNI_VALUE = 0; // el compilador se queja de que short no es bueno
+	const uint32_t DEFAULT_POSITION_VALUE = 0;
     CuckooHashing(uint32_t sizeTabla);
     bool insertDni(DniPos dniPos);
     DniPos searchDNI(uint32_t dni); // Returns the DNI with the position in drive
+    bool deleteDNI(uint32_t dni);
     uint32_t getSize();
     bool doesTableExists();
     bool writeFile() override;
