@@ -29,7 +29,7 @@ public:
         }
 
         DiskManager* diskM = DiskManager::getInstance();
-        uint32_t punteroDisco = 999997;
+        int64_t punteroDisco = 999997;
         uint32_t archivosEscritos = 0;
 
         std::string line;
@@ -125,27 +125,27 @@ public:
             	diskM->writeDisk(punteroDisco, persona.estadoCivil);
 	
             	if (cuck->getlastPos() < punteroDisco) {
-            		uint32_t pos = punteroDisco + sizeof(persona.estadoCivil);
+            		int64_t pos = punteroDisco + sizeof(persona.estadoCivil);
                 	cuck->setlastPos(pos);
             	}
-            	archivosEscritos++;
+            	//archivosEscritos++;
 	
-            	switch (archivosEscritos) {
-                	case 100:
-                	case 500:
-                	case 1000:
-                	case 10000:
-                	case 50000:
-                	case 100000:
-                	case 500000:
-                	case 1000000:
-                	case 5000000:
-                	case 10000000:
-                	case 20000000:
-                	case 33000000:
-                    	std::cout << "[FIRSTLOAD] " << archivosEscritos << " archivos escritos\n";
-                    	break;
-            	}
+            	//switch (archivosEscritos) {
+                //	case 100:
+                //	case 500:
+//                	case 1000:
+//                	case 10000:
+                //	case 50000:
+//                	case 100000:
+                //	case 500000:
+                //	case 1000000:
+//                	case 5000000:
+                //	case 10000000:
+                //	case 20000000:
+                //	case 33000000:
+                 //   	std::cout << "[FIRSTLOAD] " << archivosEscritos << " archivos escritos\n";
+               //     	break;
+            //	}
             } else {
                 std::cerr << "[FIRSTLOAD] No se pudo escribir el DNI: " << _dni << " en la posicion " << punteroDisco << " bytes" << std::endl;
             }   

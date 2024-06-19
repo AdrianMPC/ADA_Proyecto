@@ -18,7 +18,7 @@
 #include "models/personamodelo.h"
 
 // CONSTANTS
-#define INITIAL_TABLE_SIZE 40000000
+#define INITIAL_TABLE_SIZE 1000000
 
 
 uint32_t parseLine(const std::string &line)
@@ -196,7 +196,7 @@ int main()
     if (!file.is_open()) {
         std::cerr << "[MAIN-LOG] cuckohash.bin no existe, buscando personas.txt\n";
         LoadCuckoo load;
-        load.firstWrite(cuckoo,"personas_100.txt");
+        load.firstWrite(cuckoo,"personas.txt");
         std::cout<<"[MAIN-LOG] Exito, generando el archivo"<<std::endl;
     }  else {
         std::cout<<"[MAIN-LOG] Cargando tablaHash desde archivo cuckohash.bin"<<std::endl;
