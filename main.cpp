@@ -18,7 +18,7 @@
 #include "models/personamodelo.h"
 
 // CONSTANTS
-#define INITIAL_TABLE_SIZE 1000000
+#define INITIAL_TABLE_SIZE 40000000
 
 
 uint32_t parseLine(const std::string &line)

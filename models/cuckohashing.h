@@ -33,7 +33,7 @@ private:
 
 public:
 	const uint32_t DEFAULT_DNI_VALUE = 0; // el compilador se queja de que short no es bueno
-	const int64_t DEFAULT_POSITION_VALUE = -1;
+	const uint32_t DEFAULT_POSITION_VALUE = 0;
     CuckooHashing(uint32_t sizeTabla);
     bool insertDni(DniPos dniPos);
     DniPos searchDNI(uint32_t dni); // Returns the DNI with the position in drive

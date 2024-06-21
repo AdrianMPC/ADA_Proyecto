@@ -8,7 +8,7 @@
 
 
 CuckooHashing::CuckooHashing(uint32_t sizeTabla) : m_sizeTabla(sizeTabla) {
-    m_tabla.resize(sizeTabla, {0, -1});
+    m_tabla.resize(sizeTabla, {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE});
 }
 
 int32_t CuckooHashing::m_firstHash(DniPos dniPos) {
@@ -24,20 +24,21 @@ uint32_t CuckooHashing::getSize() {
 }
 
 void CuckooHashing::m_rehash(DniPos dniPos, uint32_t pos) {
-    int loopCount = 0;
+    uint32_t loopCount = 0;
     while (loopCount < m_sizeTabla) {
         std::swap(dniPos, m_tabla[pos]);
-        pos = m_firstHash(dniPos);
-        if (m_tabla[pos].pos == -1) {
-            m_tabla[pos] = dniPos;
+        uint32_t posCheck = m_firstHash(dniPos);   
+        
+        if(pos == posCheck){ // estamos en hash 1
+        	posCheck = m_secondHash(dniPos);
+        }
+        
+        if (m_tabla[posCheck].pos == DEFAULT_POSITION_VALUE) {
+            m_tabla[posCheck] = dniPos;
             return;
         }
-        std::swap(dniPos, m_tabla[pos]);
-        pos = m_secondHash(dniPos);
-        if (m_tabla[pos].pos == -1) {
-            m_tabla[pos] = dniPos;
-            return;
-        }
+        
+        pos = posCheck;
         loopCount++;
     }
 
@@ -51,10 +52,10 @@ void CuckooHashing::m_rehash(DniPos dniPos, uint32_t pos) {
 void CuckooHashing::m_rehashAll(DniPos dniPos) {
     std::vector<DniPos> oldTable = m_tabla;
 	std::cout << "[CuckooHashing] Aumentando m_tabla size de " << m_sizeTabla;
-    m_sizeTabla += 1000000;
+    m_sizeTabla += 10000000;
     std::cout << " a " << m_sizeTabla << "\n";
     m_tabla.clear();
-    m_tabla.resize(m_sizeTabla, {0, -1});
+    m_tabla.resize(m_sizeTabla, {DEFAULT_DNI_VALUE, DEFAULT_POSITION_VALUE});
 
     for (DniPos key : oldTable) {
         if (key.pos != -1) {
@@ -65,24 +66,32 @@ void CuckooHashing::m_rehashAll(DniPos dniPos) {
 }
 
 bool CuckooHashing::insertDni(DniPos dniPos) {
-    int pos1 = m_firstHash(dniPos);
     DniPos check = searchDNI(dniPos.dni);
     if(check.dni != 0){std::cout<<"[CUCKOOHASH] DNI ya existente!\n"; return false;}
-    if (m_tabla[pos1].pos == -1) {
+    uint32_t pos1 = m_firstHash(dniPos);
+    if (m_tabla[pos1].pos == DEFAULT_POSITION_VALUE) {
         m_tabla[pos1] = dniPos;
+        //std::cout << "[CUCKOOHASHING] Se inserto sin rehash el dni: "<<dniPos.dni<<"\n"; 
         return true;
     }
 
     DniPos oldKey = m_tabla[pos1];
     m_tabla[pos1] = dniPos;
-
-    int pos2 = m_secondHash(oldKey);
-    if (m_tabla[pos2].pos == -1) {
-        m_tabla[pos2] = oldKey;
+    
+    uint32_t posCheck = m_firstHash(oldKey);
+    
+    if( posCheck ==  pos1 ){  // si esta en el primer hash, haz hash2
+    	posCheck = m_secondHash(oldKey);
+    } 
+    
+    if (m_tabla[posCheck].pos == DEFAULT_POSITION_VALUE) {
+        m_tabla[posCheck] = oldKey;
+        //std::cout << "[CUCKOOHASHING] Se inserto sin rehash el dni2: "<<oldKey.dni<<"\n"; 
         return true;
     }
 
-    m_rehash(oldKey, pos2);
+    m_rehash(oldKey, posCheck);
+   //	std::cout << "[CUCKOOHASHING] Se inserto CON rehash: "<<oldKey.dni<<"\n"; 
     return true;
 }
 

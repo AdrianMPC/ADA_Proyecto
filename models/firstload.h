@@ -29,7 +29,7 @@ public:
         }
 
         DiskManager* diskM = DiskManager::getInstance();
-        int64_t punteroDisco = 999997;
+        uint32_t punteroDisco = 999997;
         uint32_t archivosEscritos = 0;
 
         std::string line;
