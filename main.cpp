@@ -18,7 +18,7 @@
 #include "models/personamodelo.h"
 
 // CONSTANTS
-#define INITIAL_TABLE_SIZE 40000000
+#define INITIAL_TABLE_SIZE 70000000
 
 
 uint32_t parseLine(const std::string &line)
@@ -192,11 +192,12 @@ int main()
     CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
     PersonaManager personaManager(cuckoo);
     // comprobamos si el .bin existe
+    auto start = std::chrono::high_resolution_clock::now();
     std::ifstream file("cuckohash.bin", std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "[MAIN-LOG] cuckohash.bin no existe, buscando personas.txt\n";
         LoadCuckoo load;
-        load.firstWrite(cuckoo,"personas.txt");
+        load.firstWrite(cuckoo,"personas_100000.txt");
         std::cout<<"[MAIN-LOG] Exito, generando el archivo"<<std::endl;
     }  else {
         std::cout<<"[MAIN-LOG] Cargando tablaHash desde archivo cuckohash.bin"<<std::endl;
@@ -207,6 +208,16 @@ int main()
         	std::cout<<"[MAIN-ERROR] Hubo un error al leer el archivo"<<std::endl;
         }
     }
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+    // Extract milliseconds and seconds
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    auto sec = duration_sec.count();
+
+    std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
   	
   	int choice;
     do {
@@ -216,6 +227,7 @@ int main()
 
         switch (choice) {
             case 1: {
+            	auto start = std::chrono::high_resolution_clock::now();
                	uint32_t dni = askDNI();
     			DniPos dniPos = cuckoo->searchDNI(dni);
 			
@@ -226,9 +238,20 @@ int main()
     			} else {
         			personaManager.readPerson(dniPos.pos);  
     			}
+    			
+				auto end = std::chrono::high_resolution_clock::now();
+    			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    			auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+			
+    			// Extract milliseconds and seconds
+    			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    			auto sec = duration_sec.count();
+			
+    			std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
                 break;
             }
             case 2: {
+            	auto start = std::chrono::high_resolution_clock::now();
                 DatosPersona persona;
                 persona.dni = 12345678;
 				persona.telefono = 945326723;
@@ -262,9 +285,19 @@ int main()
                 } else {
                     std::cout << "Error writing person.\n";
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+    			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    			auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+			
+    			// Extract milliseconds and seconds
+    			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    			auto sec = duration_sec.count();
+			
+    			std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
                 break;
             }
             case 3: {
+            	auto start = std::chrono::high_resolution_clock::now();
                 uint32_t dni;
                 std::cout << "Enter DNI to delete: ";
                 std::cin >> dni;
@@ -273,6 +306,15 @@ int main()
                 } else {
                     std::cout << "Error deleting person.\n";
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+    			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    			auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+			
+    			// Extract milliseconds and seconds
+    			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    			auto sec = duration_sec.count();
+			
+    			std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
                 break;
             }
             case 4:

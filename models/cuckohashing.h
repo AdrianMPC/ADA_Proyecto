@@ -4,19 +4,20 @@
 #include <vector>
 #include <cstdint>
 #include <fstream>
+#include <cstddef>
 #include "./i-file-utils.h"
 #include "./dni-pos.h"
 
 class CuckooHashing : public IFileUtils
 {
 private:
-    uint32_t lastPos;
+    uint64_t lastPos;
     std::vector<DniPos> m_tabla;
     char m_dirArchivo[50];
     uint32_t m_sizeTabla;
     int32_t m_firstHash(DniPos dniPos);
     int32_t m_secondHash(DniPos dniPos);
-    void m_rehash(DniPos dniPos, uint32_t pos);
+    void m_rehash(DniPos dniPos, uint64_t pos);
     void m_rehashAll(DniPos dniPos);
     bool readHashItem(std::ifstream& file, DniPos& item);   
     static int32_t hashFunction(uint32_t key, uint32_t tableSize) {
@@ -33,7 +34,7 @@ private:
 
 public:
 	const uint32_t DEFAULT_DNI_VALUE = 0; // el compilador se queja de que short no es bueno
-	const uint32_t DEFAULT_POSITION_VALUE = 0;
+	const uint64_t DEFAULT_POSITION_VALUE = 0;
     CuckooHashing(uint32_t sizeTabla);
     bool insertDni(DniPos dniPos);
     DniPos searchDNI(uint32_t dni); // Returns the DNI with the position in drive
@@ -42,8 +43,8 @@ public:
     bool doesTableExists();
     bool writeFile() override;
     bool readFile() override;
-    uint32_t getlastPos();
-    void setlastPos(uint32_t _newlastpos);
+    uint64_t getlastPos();
+    void setlastPos(uint64_t _newlastpos);
     void printVector(uint32_t max);
 };
 

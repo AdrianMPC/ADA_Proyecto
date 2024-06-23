@@ -14,7 +14,7 @@ class DiskManager {
 private:
     static std::unique_ptr<DiskManager> m_pinstance;
     static std::mutex m_mutex;
-    const char* m_dir = "/dev/sda3"; // IMPORTANTE CAMBIAR CON LA PARTICION DE TU PC (USA EL COMANDO DF)
+    const char* m_dir = "/dev/sda5"; // IMPORTANTE CAMBIAR CON LA PARTICION DE TU PC (USA EL COMANDO DF)
 
 protected:
     DiskManager() = default;
@@ -52,7 +52,7 @@ public:
     	return stat_buf.st_size;
 	}
 
-    void borrarDatosNull(uint32_t byte, short size) {
+    void borrarDatosNull(uint64_t byte, short size) {
         try {
             int fd = open(m_dir, O_WRONLY);
             if (fd == -1) {
@@ -93,7 +93,7 @@ public:
         }
     }
 
-    void writeDisk(uint32_t byte, const char* dato) {
+    void writeDisk(uint64_t byte, const char* dato) {
         try {
         		// Verificar que la partición es accesible y writable
     		if (!checkPartition(m_dir)) {
@@ -149,7 +149,7 @@ public:
         }
     }
 	// DEPRECADO
-    void writeDiskInt(uint32_t byte, const uint32_t dato) {
+    void writeDiskInt(uint64_t byte, const uint32_t dato) {
         try {
             int fd = open(m_dir, O_WRONLY);
             if (fd == -1) {
@@ -191,7 +191,7 @@ public:
         }
     }
 
-    bool readDisk(uint32_t byte, char* dato_llenar, short size) {
+    bool readDisk(uint64_t byte, char* dato_llenar, short size) {
         try {
             int fd = open(m_dir, O_RDONLY);
             if (fd == -1) {

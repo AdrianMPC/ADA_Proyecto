@@ -6,7 +6,7 @@
 PersonaManager::PersonaManager(CuckooHashing* cuckoo){
 	m_cuckoo = cuckoo;
 }
-bool PersonaManager::readPerson(uint32_t pos){
+bool PersonaManager::readPerson(uint64_t pos){
 	const short DNI_SIZE = 9;
     const short PHONE_SIZE = 10;
 
@@ -15,7 +15,7 @@ bool PersonaManager::readPerson(uint32_t pos){
     char num[PHONE_SIZE];
 
     DiskManager *diskM = DiskManager::getInstance();
-    uint32_t posDisco = pos;
+    uint64_t posDisco = pos;
 
     auto readField = [&](const char* fieldName, char* field, short size) {
         diskM->readDisk(posDisco, field, size);
@@ -44,7 +44,7 @@ bool PersonaManager::writePerson(DatosPersona& persona){
     const short PHONE_SIZE = 10;
     
     DiskManager* diskM = DiskManager::getInstance();
-    uint32_t punteroDisco = m_cuckoo->getlastPos();
+    uint64_t punteroDisco = m_cuckoo->getlastPos();
     punteroDisco += 1;   // necesario, no borrar
 
     char _dni[DNI_SIZE];
