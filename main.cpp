@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <signal.h>
 #include "models/btree.h"
 #include "models/disk-manager.h"
 #include "models/cuckohashing.h"
@@ -19,6 +20,7 @@
 
 // CONSTANTS
 #define INITIAL_TABLE_SIZE 70000000
+CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
 
 
 uint32_t parseLine(const std::string &line)
@@ -186,10 +188,21 @@ void printMenu() {
     std::cout << "Enter your choice: ";
 }
 
+void signalHandler(int signum) {
+   	if (cuckoo->writeFile()){
+    	std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
+    } else {
+    	std::cout << "[PersonaManager] cuckoohash.bin no se genero correctamente\n";
+    }
+    exit(signum);
+}
+
+
 int main()
 {
 	//TODO Cambiar esto para que no sea una aberracion en el main (talvez una clase)
-    CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
+    std::signal(SIGINT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
     PersonaManager personaManager(cuckoo);
     // comprobamos si el .bin existe
     auto start = std::chrono::high_resolution_clock::now();
@@ -197,7 +210,7 @@ int main()
     if (!file.is_open()) {
         std::cerr << "[MAIN-LOG] cuckohash.bin no existe, buscando personas.txt\n";
         LoadCuckoo load;
-        load.firstWrite(cuckoo,"personas_100000.txt");
+        load.firstWrite(cuckoo,"personas.txt");
         std::cout<<"[MAIN-LOG] Exito, generando el archivo"<<std::endl;
     }  else {
         std::cout<<"[MAIN-LOG] Cargando tablaHash desde archivo cuckohash.bin"<<std::endl;

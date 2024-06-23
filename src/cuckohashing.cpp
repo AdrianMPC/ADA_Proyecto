@@ -165,7 +165,7 @@ bool CuckooHashing::writeFile() {
 
     // Write the size of the hash table
     uint32_t size = getSize();
-    std::cout<<"[CuckooHashing-WriteFile] VectorSize: "<<size<<"\n";
+    std::cout<<"\n[CuckooHashing-WriteFile] VectorSize: "<<size<<"\n";
     file.write(reinterpret_cast<const char*>(&size), sizeof(size));
      if (!file) {
         std::cerr << "[CuckooHashing] Error writing size to file\n";

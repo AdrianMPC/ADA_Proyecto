@@ -100,13 +100,8 @@ bool PersonaManager::writePerson(DatosPersona& persona){
 
         m_cuckoo->setlastPos(punteroDisco);
 
-        std::cout << "[PersonaManager] Persona con DNI " << _dni << " se escribio.\n";
-        std::cout << "[PersonaManager] Guardando cambios\n";
-        if (m_cuckoo->writeFile()) {
-            std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
-            return true;
-       	}
-        return false;
+        std::cout << "[PersonaManager] Persona con DNI " << _dni << " se escribio" << " en posicion: "<< m_cuckoo->getlastPos() << "\n" ;
+        return true;
     } else {
         std::cerr << "[PersonaManager] No se pudo insertar to insert DNI " << _dni << " into the hash table.\n";
         return false;
@@ -120,12 +115,8 @@ bool PersonaManager::deletePerson(uint32_t dni){
         bool result = m_cuckoo->deleteDNI(dni);
         if (result) {
             std::cout << "[PersonaManager] Persona con DNI " << dni << " eliminado correctamente.\n";
-            std::cout << "[PersonaManager] Guardando cambios\n";
-            if (m_cuckoo->writeFile()) {
-            	std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
-            	return true;
-       	 	}
-        	return false;
+            std::cout << "[PersonaManager] Guardando cambios\n";        
+        	return true;
         } else {
             std::cerr << "[PersonaManager] No se elimino la persona correctamente con " << dni << ".\n";
             return false;

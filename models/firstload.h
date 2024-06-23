@@ -33,7 +33,8 @@ public:
         uint32_t archivosEscritos = 0;
 
         std::string line;
-        std::cerr << "[LoadCuckoo] personas.txt encontrado, cargando archivos\n";
+        std::cerr << "[LoadCuckoo] personas.txt encontrado.\n";
+        std::cerr << "[LoadCuckoo] Escribiendo datos en hash y disco...\n";
 
         while (std::getline(file, line)) {
             std::istringstream iss(line);
