@@ -2,11 +2,13 @@
 #include "../models/personamanager.h"
 #include <string>
 #include <cstring>
+#include <cstdlib>
 
 PersonaManager::PersonaManager(CuckooHashing* cuckoo){
 	m_cuckoo = cuckoo;
 }
-bool PersonaManager::readPerson(uint64_t pos){
+
+DatosPersona PersonaManager::readPerson(uint64_t pos){
 	const short DNI_SIZE = 9;
     const short PHONE_SIZE = 10;
 
@@ -20,7 +22,7 @@ bool PersonaManager::readPerson(uint64_t pos){
     auto readField = [&](const char* fieldName, char* field, short size) {
         diskM->readDisk(posDisco, field, size);
         posDisco += size + 1;
-        std::cout << fieldName << ": " << field << "\n";
+        //std::cout << fieldName << ": " << field << "\n";
     };
 
     std::cout << "Datos de las personas: \n";
@@ -34,9 +36,11 @@ bool PersonaManager::readPerson(uint64_t pos){
     readField("Telefono", num, PHONE_SIZE);
     readField("Correo", persona.correo, sizeof(persona.correo));
     readField("Estado Civil", persona.estadoCivil, sizeof(persona.estadoCivil));
+    persona->dni = std::atoi(_dni);
+    persona->telefono = std::atoi(num);
 
     std::cout << "\n";
-    return true;
+    return persona;
 }
 
 bool PersonaManager::writePerson(DatosPersona& persona){
