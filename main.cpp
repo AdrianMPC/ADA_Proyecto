@@ -1,11 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <signal.h>
 #include "models/btree.h"
 #include "models/disk-manager.h"
 #include "models/cuckohashing.h"
 #include "models/firstload.h"
-#include "dni-pos.h"
+#include "models/dni-pos.h"
+#include "models/personamanager.h"
 
 
 // FOR API
@@ -17,7 +19,8 @@
 #include "models/personamodelo.h"
 
 // CONSTANTS
-#define INITIAL_TABLE_SIZE 40000000
+#define INITIAL_TABLE_SIZE 70000000
+CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
 
 
 uint32_t parseLine(const std::string &line)
@@ -80,55 +83,10 @@ void BTreeTesting()
     }
 }
 
-void ReadPerson(uint32_t pos){
-	DatosPersona persona;
-
-	char _dni[9];
-	char num[10];
-	
-	DiskManager *diskM = DiskManager::getInstance();
-	uint32_t posDisco = pos;
-	// dni
-	diskM->readDisk(posDisco,_dni,sizeof(_dni));
-	posDisco += sizeof(_dni) + 1;
-	std::cout << _dni << " | ";
-	// nombres
-	diskM->readDisk(posDisco,persona.nombres,sizeof(persona.nombres));
-	posDisco += sizeof(persona.nombres) + 1;
-	std::cout << persona.nombres << " | ";
-	// apellidos
-	diskM->readDisk(posDisco,persona.apellidos,sizeof(persona.apellidos));
-	posDisco += sizeof(persona.apellidos) + 1;
-	std::cout << persona.apellidos << " | ";
-	// direccion
-	diskM->readDisk(posDisco,persona.direccion,sizeof(persona.direccion));
-	posDisco += sizeof(persona.direccion) + 1;
-	std::cout << persona.direccion << " | ";
-	// nacimiento
-	diskM->readDisk(posDisco,persona.nacimiento,sizeof(persona.nacimiento));
-	posDisco += sizeof(persona.nacimiento) + 1;
-	std::cout << persona.nacimiento << " | ";
-	// nacionalidad
-	diskM->readDisk(posDisco,persona.nacionalidad,sizeof(persona.nacionalidad));
-	posDisco += sizeof(persona.nacionalidad) + 1;
-	std::cout << persona.nacionalidad << " | ";
-	// lugarnacimiento
-	diskM->readDisk(posDisco,persona.lugarnacimiento,sizeof(persona.lugarnacimiento));
-	posDisco += sizeof(persona.lugarnacimiento) + 1;
-	std::cout << persona.lugarnacimiento << " | ";
-	// telefono
-	diskM->readDisk(posDisco,num,sizeof(num));
-	posDisco += sizeof(num) + 1;
-	std::cout << num << " | ";
-	// correo
-	diskM->readDisk(posDisco,persona.correo,sizeof(persona.correo));
-	posDisco += sizeof(persona.correo) + 1;
-	std::cout << persona.correo << " | ";
-	// correo
-	diskM->readDisk(posDisco,persona.estadoCivil,sizeof(persona.estadoCivil));
-	posDisco += sizeof(persona.estadoCivil) + 1;
-	std::cout << persona.estadoCivil << "\n";
+void ReadPerson(uint32_t pos) {
+   
 }
+
 
 // LA FORMULA PARA DETERMINAR QUE POSICION USAR SIGUIENTE ES:
 // (TAMAÑO DE DATOS (QUE YA INCLUYE EL \0) + 1)
@@ -191,31 +149,195 @@ DatosPersona parseBody(const auto &body)
     return datosPersona;
 }
 
-int main()
-{
-    CuckooHashing* cuckoo = new CuckooHashing(INITIAL_TABLE_SIZE);
-    // comprobamos si el .bin existe
-    std::ifstream file("cuckohash.bin", std::ios::binary);
-    if (!file.is_open()) {
-        std::cerr << "[MAIN] cuckohash.bin no existe, buscando personas.txt\n";
-        LoadCuckoo load;
-        load.firstWrite(cuckoo,"personas_100.txt");
-        std::cout<<"[MAIN] Exito, generando el archivo"<<std::endl;
-    }  else {
-        std::cout<<"[MAIN] Cargar cuckoo en nuevo vector..."<<std::endl;
-        if(cuckoo->readFile()){
-        	std::cout<<"[MAIN] Vector online"<<std::endl;
-        	std::cout<<"[TEST] Imprimiendo los primeros 100 valores del vector"<<std::endl;
-  			cuckoo->imprimirVector(100);
+bool isValidInteger(const std::string& str) {
+    for (char c : str) {
+        if (!std::isdigit(c)) {
+            return false;
         }
     }
-    
-    
-    std::cout << "[TESTING] probando con DNI # 21047390" << std::endl;
-   	DniPos dniPos = cuckoo->searchDNI(21047390);
-   	if(dniPos.dni == 0) {std::cout << "DNI no existente" <<std::endl;} else {
-   		ReadPerson(dniPos.dni);
-   	}
+    return !str.empty();  
+}
+
+// Función para pedir y validar el DNI del usuario
+uint32_t askDNI() {
+    std::string input;
+    uint32_t dni;
+
+    while (true) {
+        std::cout << "Ingrese su DNI: ";
+        std::cin >> input;
+        if (isValidInteger(input)) {
+            dni = std::stoul(input);
+            break;
+        } else {
+            std::cout << "Entrada inválida. El DNI debe ser un número entero positivo.\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+
+    return dni;
+}
+
+void printMenu() {
+    std::cout << "\nMenu TEST:\n";
+    std::cout << "1. Read Person\n";
+    std::cout << "2. Write Person\n";
+    std::cout << "3. Delete Person\n";
+    std::cout << "4. Exit TEST\n";
+    std::cout << "Enter your choice: ";
+}
+
+void signalHandler(int signum) {
+   	if (cuckoo->writeFile()){
+    	std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
+    } else {
+    	std::cout << "[PersonaManager] cuckoohash.bin no se genero correctamente\n";
+    }
+    exit(signum);
+}
+
+
+int main()
+{
+	//TODO Cambiar esto para que no sea una aberracion en el main (talvez una clase)
+    std::signal(SIGINT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
+    PersonaManager personaManager(cuckoo);
+    // comprobamos si el .bin existe
+    auto start = std::chrono::high_resolution_clock::now();
+    std::ifstream file("cuckohash.bin", std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "[MAIN-LOG] cuckohash.bin no existe, buscando personas.txt\n";
+        LoadCuckoo load;
+        load.firstWrite(cuckoo,"personas.txt");
+        std::cout<<"[MAIN-LOG] Exito, generando el archivo"<<std::endl;
+    }  else {
+        std::cout<<"[MAIN-LOG] Cargando tablaHash desde archivo cuckohash.bin"<<std::endl;
+        if(cuckoo->readFile()){
+        	std::cout<<"[MAIN-LOG] Vector online"<<std::endl;
+  			//cuckoo->printVector(100);
+        } else {
+        	std::cout<<"[MAIN-ERROR] Hubo un error al leer el archivo"<<std::endl;
+        }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+    // Extract milliseconds and seconds
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    auto sec = duration_sec.count();
+
+    std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
+  	
+  	int choice;
+    do {
+        printMenu();
+        std::cin >> choice;
+        std::cin.ignore(); // Ignore newline character left in the buffer
+
+        switch (choice) {
+            case 1: {
+            	auto start = std::chrono::high_resolution_clock::now();
+               	uint32_t dni = askDNI();
+    			DniPos dniPos = cuckoo->searchDNI(dni);
+			
+    			std::cout << "[MAIN-LOG] Buscando DNI: " << dniPos.dni << " y POS: " << dniPos.pos << std::endl;
+    			
+    			if (dniPos.dni == 0) {
+        			std::cout << "[MAIN-LOG] DNI no encontrado" << std::endl;
+    			} else {
+        			personaManager.readPerson(dniPos.pos);  
+    			}
+    			
+				auto end = std::chrono::high_resolution_clock::now();
+    			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    			auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+			
+    			// Extract milliseconds and seconds
+    			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    			auto sec = duration_sec.count();
+			
+    			std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
+                break;
+            }
+            case 2: {
+            	auto start = std::chrono::high_resolution_clock::now();
+                DatosPersona persona;
+                persona.dni = 12345678;
+				persona.telefono = 945326723;
+				
+				std::strncpy(persona.nombres, "Pedro Miguel", sizeof(persona.nombres) - 1);
+                persona.nombres[sizeof(persona.nombres) - 1] = '\0';
+
+                std::strncpy(persona.apellidos, "Hernández Martínez", sizeof(persona.apellidos) - 1);
+                persona.apellidos[sizeof(persona.apellidos) - 1] = '\0';
+
+                std::strncpy(persona.direccion, "Pucallpa, Manantay", sizeof(persona.direccion) - 1);
+                persona.direccion[sizeof(persona.direccion) - 1] = '\0';
+
+                std::strncpy(persona.nacimiento, "20/9/78", sizeof(persona.nacimiento) - 1);
+                persona.nacimiento[sizeof(persona.nacimiento) - 1] = '\0';
+
+                std::strncpy(persona.nacionalidad, "EXT", sizeof(persona.nacionalidad) - 1);
+                persona.nacionalidad[sizeof(persona.nacionalidad) - 1] = '\0';
+
+                std::strncpy(persona.lugarnacimiento, "Barcelona", sizeof(persona.lugarnacimiento) - 1);
+                persona.lugarnacimiento[sizeof(persona.lugarnacimiento) - 1] = '\0';
+
+                std::strncpy(persona.correo, "luis7@gmail.com", sizeof(persona.correo) - 1);
+                persona.correo[sizeof(persona.correo) - 1] = '\0';
+
+                std::strncpy(persona.estadoCivil, "S", sizeof(persona.estadoCivil) - 1);
+                persona.estadoCivil[sizeof(persona.estadoCivil) - 1] = '\0';
+
+                if (personaManager.writePerson(persona)) {
+                    std::cout << "Person written successfully.\n";
+                } else {
+                    std::cout << "Error writing person.\n";
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+    			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    			auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+			
+    			// Extract milliseconds and seconds
+    			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    			auto sec = duration_sec.count();
+			
+    			std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
+                break;
+            }
+            case 3: {
+            	auto start = std::chrono::high_resolution_clock::now();
+                uint32_t dni;
+                std::cout << "Enter DNI to delete: ";
+                std::cin >> dni;
+                if (personaManager.deletePerson(dni)) {
+                    std::cout << "Person deleted successfully.\n";
+                } else {
+                    std::cout << "Error deleting person.\n";
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+    			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    			auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+			
+    			// Extract milliseconds and seconds
+    			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration_ms).count() % 1000;
+    			auto sec = duration_sec.count();
+			
+    			std::cout << "Time taken: " << sec << " seconds and " << ms << " milliseconds\n";
+                break;
+            }
+            case 4:
+                std::cout << "Exiting TEST...\n";
+                break;
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 4);
+
     
 
     // API WITH CROW
