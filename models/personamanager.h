@@ -6,7 +6,7 @@ class PersonaManager {
 		CuckooHashing* m_cuckoo;
 	public:
 		PersonaManager(CuckooHashing* cuckoo);
-		bool readPerson(uint64_t pos);
+		DatosPersona readPerson(uint64_t pos);
 		bool writePerson(DatosPersona& data);
 		bool deletePerson(uint32_t dni);
 };

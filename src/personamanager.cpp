@@ -36,8 +36,8 @@ DatosPersona PersonaManager::readPerson(uint64_t pos){
     readField("Telefono", num, PHONE_SIZE);
     readField("Correo", persona.correo, sizeof(persona.correo));
     readField("Estado Civil", persona.estadoCivil, sizeof(persona.estadoCivil));
-    persona->dni = std::atoi(_dni);
-    persona->telefono = std::atoi(num);
+    persona.dni = std::atoi(_dni);
+    persona.telefono = std::atoi(num);
 
     std::cout << "\n";
     return persona;
