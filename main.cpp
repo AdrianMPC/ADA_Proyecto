@@ -98,27 +98,12 @@ void printMenu()
     std::cout << "2. Write Person\n";
     std::cout << "3. Delete Person\n";
     std::cout << "4. Exit TEST\n";
+    std::cout << "5. Guardar BIN\n";
     std::cout << "Enter your choice: ";
-}
-
-void signalHandler(int signum)
-{
-    if (cuckoo->writeFile())
-    {
-        std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
-    }
-    else
-    {
-        std::cout << "[PersonaManager] cuckoohash.bin no se genero correctamente\n";
-    }
-    exit(signum);
 }
 
 int main()
 {
-    // TODO Cambiar esto para que no sea una aberracion en el main (talvez una clase)
-    std::signal(SIGINT, signalHandler);
-    std::signal(SIGTERM, signalHandler);
     PersonaManager personaManager(cuckoo);
     // comprobamos si el .bin existe
     auto start = std::chrono::high_resolution_clock::now();
@@ -160,12 +145,13 @@ int main()
         {
         case 1:
         {
-            auto start = std::chrono::high_resolution_clock::now();
+            
             uint32_t dni = askDNI();
+            auto start = std::chrono::high_resolution_clock::now();
             DniPos dniPos = cuckoo->searchDNI(dni);
 
             std::cout << "[MAIN-LOG] Buscando DNI: " << dniPos.dni << " y POS: " << dniPos.pos << std::endl;
-
+			
             if (dniPos.dni == 0)
             {
                 std::cout << "[MAIN-LOG] DNI no encontrado" << std::endl;
@@ -238,10 +224,10 @@ int main()
         }
         case 3:
         {
-            auto start = std::chrono::high_resolution_clock::now();
             uint32_t dni;
             std::cout << "Enter DNI to delete: ";
             std::cin >> dni;
+            auto start = std::chrono::high_resolution_clock::now();
             if (personaManager.deletePerson(dni))
             {
                 std::cout << "Person deleted successfully.\n";
@@ -264,6 +250,20 @@ int main()
         case 4:
             std::cout << "Exiting TEST...\n";
             break;
+        case 5:
+       	{
+       		std::cout << "[PersonaManager] Guardando archivo\n";
+            if (cuckoo->writeFile())
+    		{
+        		std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
+    		}
+    		else
+    		{
+        		std::cout << "[PersonaManager] cuckoohash.bin no se genero correctamente\n";
+
+    		}
+            break;
+        }
         default:
             std::cout << "Invalid choice. Please try again.\n";
         }
@@ -396,7 +396,34 @@ int main()
             return crow::response(404, "DNI Not Found");
         } });
 
-
+		// POST PERSON ROUTE
+    // THIS ROUTE WILL RECEIVE A JSON WITH A DNI AND WILL CREATE A PERSON IN THE HARD DRIVE
+    CROW_ROUTE(app, "/api/save").methods(crow::HTTPMethod::POST)([&](const crow::request &req)
+                                                                {
+        try
+        {
+        	std::cout << "[PersonaManager] Guardando archivo\n";
+          	if (cuckoo->writeFile())
+    		{
+        		std::cout << "[PersonaManager] cuckoohash.bin se genero correctamente\n";
+        		 return crow::response(200, crow::json::wvalue{
+                                        {"estado", "exito"},
+                                    });
+    		}
+    		else
+    		{
+        		std::cout << "[PersonaManager] cuckoohash.bin no se genero correctamente\n";
+        		return crow::response(400, crow::json::wvalue{
+                                        {"estado", "error al escribir el bin"},
+                                    });
+    		}
+        
+        }
+        catch (const std::exception &err)
+        {
+            return crow::response(400, "Error al escribir los datos");
+        } });
+		
 
     app.port(3000)
         .multithreaded()
