@@ -1,5 +1,7 @@
-#include "../models/btree.h"
 #include <iostream>
+#include "../models/btree.h"
+#include "../models/personamodelo.h"
+
 
 BTreeNode::BTreeNode(short _minDegree, bool _isLeaf){ 
     m_minDegree = _minDegree;
@@ -12,85 +14,87 @@ BTreeNode::BTreeNode(short _minDegree, bool _isLeaf){
 void BTreeNode::traverse() {
     uint32_t i;
     for (i = 0; i < m_numKeys; i++) {
-        if (!m_isLeaf) 
+        if (!m_isLeaf)
             m_children[i]->traverse();
-        std::cout << " " << m_keys[i]->dni;
+        std::cout << " " << m_keys[i];
     }
-    if (!m_isLeaf) m_children[i]->traverse();
+    if (!m_isLeaf)
+        m_children[i]->traverse();
 }
 
-DatosPersona* BTreeNode::search(uint32_t dni) {
+bool BTreeNode::search(uint32_t dni) {
     uint32_t i = 0;
-    while (i < m_numKeys && dni > m_keys[i]->dni) 
+    while (i < m_numKeys && dni > m_keys[i])
         i++;
-    if (i < m_numKeys && m_keys[i]->dni == dni) 
-        return m_keys[i];
-    if (m_isLeaf) 
-        return nullptr;
+    if (i < m_numKeys && m_keys[i] == dni)
+        return true;
+    if (m_isLeaf)
+        return false;
     return m_children[i]->search(dni);
 }
 
-void BTreeNode::insertNonFull(DatosPersona* person) {
-    int32_t index = m_numKeys-1;
+void BTreeNode::insertNonFull(uint32_t key) {
+    int32_t index = m_numKeys - 1;
     if (m_isLeaf) {
-        while (index >= 0 && m_keys[index]->dni > person->dni) {
-            m_keys[index+1] = m_keys[index];
+        while (index >= 0 && m_keys[index] > key) {
+            m_keys[index + 1] = m_keys[index];
             index--;
         }
-        m_keys[index+1] = person;
+        m_keys[index + 1] = key;
         m_numKeys++;
-    } else { 
-        while (index >= 0 && m_keys[index]->dni > person->dni) 
+    } else {
+        while (index >= 0 && m_keys[index] > key)
             index--;
-        if (m_children[index+1]->m_numKeys == 2*m_minDegree-1) {
-            splitChild(index+1, m_children[index+1]);
-            if (m_keys[index+1]->dni < person->dni) index++;
+        if (m_children[index + 1]->m_numKeys == 2 * m_minDegree - 1) {
+            splitChild(index + 1, m_children[index + 1]);
+            if (m_keys[index + 1] < key)
+                index++;
         }
-        m_children[index+1]->insertNonFull(person);
-    }  
+        m_children[index + 1]->insertNonFull(key);
+    }
 }
+
 
 void BTreeNode::splitChild(int32_t index, BTreeNode* childNode) {
     BTreeNode* newChild = new BTreeNode(childNode->m_minDegree, childNode->m_isLeaf);
     newChild->m_numKeys = m_minDegree - 1;
 
-    for (short j = 0; j < m_minDegree-1; j++){                          
-        newChild->m_keys[j] = childNode->m_keys[j+m_minDegree];   
+    for (short j = 0; j < m_minDegree - 1; j++) {
+        newChild->m_keys[j] = childNode->m_keys[j + m_minDegree];
     }
 
     if (!childNode->m_isLeaf) {
-        for (short j = 0; j < m_minDegree; j++) 
-            newChild->m_children[j] = childNode->m_children[j+m_minDegree];
+        for (short j = 0; j < m_minDegree; j++)
+            newChild->m_children[j] = childNode->m_children[j + m_minDegree];
     }
     childNode->m_numKeys = m_minDegree - 1;
 
-    for (short j = m_numKeys; j >= index+1; j--){
-        m_children[j+1] = m_children[j];
+    for (short j = m_numKeys; j >= index + 1; j--) {
+        m_children[j + 1] = m_children[j];
     }
-    m_children[index+1] = newChild;
+    m_children[index + 1] = newChild;
 
-    for (short j = m_numKeys-1; j >= index; j--){
-        m_keys[j+1] = m_keys[j];
+    for (short j = m_numKeys - 1; j >= index; j--) {
+        m_keys[j + 1] = m_keys[j];
     }
-    m_keys[index] = childNode->m_keys[m_minDegree-1];
+    m_keys[index] = childNode->m_keys[m_minDegree - 1];
 
     m_numKeys++;
 }
 
-
-void BTreeNode::remove(uint32_t dni) {
+void BTreeNode::remove(uint32_t key) {
     int32_t index = 0;
-    while (index < m_numKeys && m_keys[index]->dni < dni) 
+    while (index < m_numKeys && m_keys[index] < key)
         index++;
 
-    if (index < m_numKeys && m_keys[index]->dni == dni) {
+    if (index < m_numKeys && m_keys[index] == key) {
         if (m_isLeaf)
             removeFromLeaf(index);
         else
             removeFromNonLeaf(index);
     } else {
         if (m_isLeaf) {
-            std::cout << "La llave " << dni << " no existe en el arbol\n";
+            std::cout << "La llave " << key << " no existe en el árbol\n";
             return;
         }
 
@@ -99,9 +103,9 @@ void BTreeNode::remove(uint32_t dni) {
             fill(index);
 
         if (flag && index > m_numKeys)
-            m_children[index - 1]->remove(dni);
+            m_children[index - 1]->remove(key);
         else
-            m_children[index]->remove(dni);
+            m_children[index]->remove(key);
     }
 }
 
@@ -112,30 +116,30 @@ void BTreeNode::removeFromLeaf(int32_t index) {
 }
 
 void BTreeNode::removeFromNonLeaf(int32_t index) {
-    DatosPersona* key = m_keys[index];
+    uint32_t key = m_keys[index];
 
     if (m_children[index]->m_numKeys >= m_minDegree) {
-        DatosPersona* pred = getPredecessor(index);
+        uint32_t pred = getPredecessor(index);
         m_keys[index] = pred;
-        m_children[index]->remove(pred->dni);
+        m_children[index]->remove(pred);
     } else if (m_children[index + 1]->m_numKeys >= m_minDegree) {
-        DatosPersona* succ = getSuccessor(index);
+        uint32_t succ = getSuccessor(index);
         m_keys[index] = succ;
-        m_children[index + 1]->remove(succ->dni);
+        m_children[index + 1]->remove(succ);
     } else {
         merge(index);
-        m_children[index]->remove(key->dni);
+        m_children[index]->remove(key);
     }
 }
 
-DatosPersona* BTreeNode::getPredecessor(int32_t index) {
+uint32_t BTreeNode::getPredecessor(int32_t index) {
     BTreeNode* cur = m_children[index];
     while (!cur->m_isLeaf)
         cur = cur->m_children[cur->m_numKeys];
     return cur->m_keys[cur->m_numKeys - 1];
 }
 
-DatosPersona* BTreeNode::getSuccessor(int32_t index) {
+uint32_t BTreeNode::getSuccessor(int32_t index) {
     BTreeNode* cur = m_children[index + 1];
     while (!cur->m_isLeaf)
         cur = cur->m_children[0];
@@ -159,11 +163,11 @@ void BTreeNode::borrowFromPrev(int32_t index) {
     BTreeNode* child = m_children[index];
     BTreeNode* sibling = m_children[index - 1];
 
-    for (uint32_t i = child->m_numKeys - 1; i >= 0; --i)
+    for (int32_t i = child->m_numKeys - 1; i >= 0; --i)
         child->m_keys[i + 1] = child->m_keys[i];
 
     if (!child->m_isLeaf) {
-        for (uint32_t i = child->m_numKeys; i >= 0; --i)
+        for (int32_t i = child->m_numKeys; i >= 0; --i)
             child->m_children[i + 1] = child->m_children[i];
     }
 
@@ -176,6 +180,7 @@ void BTreeNode::borrowFromPrev(int32_t index) {
     sibling->m_numKeys -= 1;
 }
 
+
 void BTreeNode::borrowFromNext(int32_t index) {
     BTreeNode* child = m_children[index];
     BTreeNode* sibling = m_children[index + 1];
@@ -187,11 +192,11 @@ void BTreeNode::borrowFromNext(int32_t index) {
 
     m_keys[index] = sibling->m_keys[0];
 
-    for (uint32_t i = 1; i < sibling->m_numKeys; ++i)
+    for (int32_t i = 1; i < sibling->m_numKeys; ++i)
         sibling->m_keys[i - 1] = sibling->m_keys[i];
 
     if (!sibling->m_isLeaf) {
-        for (uint32_t i = 1; i <= sibling->m_numKeys; ++i)
+        for (int32_t i = 1; i <= sibling->m_numKeys; ++i)
             sibling->m_children[i - 1] = sibling->m_children[i];
     }
 
@@ -205,18 +210,18 @@ void BTreeNode::merge(int32_t index) {
 
     child->m_keys[m_minDegree - 1] = m_keys[index];
 
-    for (uint32_t i = 0; i < sibling->m_numKeys; ++i)
+    for (int32_t i = 0; i < sibling->m_numKeys; ++i)
         child->m_keys[i + m_minDegree] = sibling->m_keys[i];
 
     if (!child->m_isLeaf) {
-        for (uint32_t i = 0; i <= sibling->m_numKeys; ++i)
+        for (int32_t i = 0; i <= sibling->m_numKeys; ++i)
             child->m_children[i + m_minDegree] = sibling->m_children[i];
     }
 
-    for (uint32_t i = index + 1; i < m_numKeys; ++i)
+    for (int32_t i = index + 1; i < m_numKeys; ++i)
         m_keys[i - 1] = m_keys[i];
 
-    for (uint32_t i = index + 2; i <= m_numKeys; ++i)
+    for (int32_t i = index + 2; i <= m_numKeys; ++i)
         m_children[i - 1] = m_children[i];
 
     child->m_numKeys += sibling->m_numKeys + 1;
@@ -224,6 +229,7 @@ void BTreeNode::merge(int32_t index) {
 
     delete sibling;
 }
+
 
 // implementacion btree
 
@@ -242,13 +248,13 @@ void BTree::traverse() {
     }
 }
 
-void BTree::insertPerson(DatosPersona* person) {
+void BTree::insertPerson(uint32_t key) {
     if (m_root == nullptr) {
         m_root = new BTreeNode(m_minDegree, true);
-        m_root->m_keys[0] = person; 
+        m_root->m_keys[0] = key; 
         m_root->m_numKeys = 1; 
     } else { 
-        if (m_root->m_numKeys == 2*m_minDegree-1) {
+        if (m_root->m_numKeys == 2 * m_minDegree - 1) {
             BTreeNode* newRoot = new BTreeNode(m_minDegree, false);
 
             newRoot->m_children[0] = m_root;
@@ -256,24 +262,25 @@ void BTree::insertPerson(DatosPersona* person) {
 
             int32_t index = 0;
 
-            if (newRoot->m_keys[0]->dni < person->dni) 
+            if (newRoot->m_keys[0] < key) 
                 index++;
 
-            newRoot->m_children[index]->insertNonFull(person);
+            newRoot->m_children[index]->insertNonFull(key);
             m_root = newRoot;
         } else { 
-            m_root->insertNonFull(person);
+            m_root->insertNonFull(key);
         }
     }
 }
 
-DatosPersona* BTree::searchDNI(uint32_t dni) {
-    return (m_root == nullptr) ? nullptr : m_root->search(dni);
+bool BTree::searchDNI(uint32_t dni) {
+    return (m_root == nullptr) ? false : m_root->search(dni);
 }
+
 
 void BTree::deleteDNI(uint32_t dni) {
     if (!m_root) {
-        std::cout << "Arbol vacio!" << std::endl;
+        std::cout << "Árbol vacío!" << std::endl;
         return;
     }
     m_root->remove(dni);
