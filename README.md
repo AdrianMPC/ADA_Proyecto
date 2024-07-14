@@ -1,6 +1,9 @@
+# CUIDADO
+Este proyecto fácilmente puede romper sistemas operativos si selecciona la partición incorrecta,
+
 # Proyecto ADA
 
-Este proyecto trata de implementar 33 millones de datos en el disco directamente
+Este proyecto trata de implementar 33 millones de datos en el disco directamente 
 
 ## Acerca del Proyecto
 
